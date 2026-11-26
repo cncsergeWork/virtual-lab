@@ -20,8 +20,8 @@ Rectangle {
     readonly property color panelColor: surface || "#14263b"
     readonly property bool lightPanel: (0.2126 * panelColor.r + 0.7152 * panelColor.g + 0.0722 * panelColor.b) >= 0.55
     readonly property color ink: customInk ? faceColor : !valid ? (lightPanel ? "#53677a" : "#90a4b7") : alarm ? "#ff9976" : faceColor
-    readonly property string quality: !bound ? "Тег не выбран" : alarm ? "Тревога" :
-        reading.quality === "error" ? "Ошибка чтения" : hasReading ? "Данные устарели" : "Нет данных"
+    readonly property string quality: !bound ? qsTr("Тег не выбран") : alarm ? qsTr("Тревога") :
+        reading.quality === "error" ? qsTr("Ошибка чтения") : hasReading ? qsTr("Данные устарели") : qsTr("Нет данных")
     radius: 8
     color: panelColor
     clip: true
@@ -53,6 +53,8 @@ Rectangle {
         anchors.fill: parent
         readonly property color scaleInk: face.lightPanel ? "#4b6174" : "#a9bece"
         readonly property color grid: face.lightPanel ? "#99aaba" : "#425b72"
+        readonly property var compassLetters: [qsTr("В"), qsTr("Ю"), qsTr("З"), qsTr("С")]
+        readonly property string lampStatus: face.hasReading ? (face.value !== 0 ? qsTr("Включено") : qsTr("Выключено")) : "—"
         readonly property var digits: ({
             "0": "abcdef", "1": "bc", "2": "abdeg", "3": "abcdg", "4": "bcfg",
             "5": "acdfg", "6": "acdefg", "7": "abc", "8": "abcdefg", "9": "abcdfg",
@@ -60,6 +62,8 @@ Rectangle {
         })
         onWidthChanged: requestPaint()
         onHeightChanged: requestPaint()
+        onCompassLettersChanged: requestPaint()
+        onLampStatusChanged: requestPaint()
 
         function polar(x, y, radius, angle) {
             return [x + radius * Math.cos(angle), y + radius * Math.sin(angle)]
@@ -186,7 +190,7 @@ Rectangle {
                 stroke(ctx, polar(x, y, r * (i % 3 === 0 ? 0.84 : 0.93), angle),
                        polar(x, y, r, angle), i % 3 === 0 ? 1.3 : 0.75, scaleInk)
             }
-            const letters = ["В", "Ю", "З", "С"]
+            const letters = compassLetters
             for (let i = 0; i < 4; ++i) {
                 const point = polar(x, y, r * 1.21, i * Math.PI / 2)
                 textAt(ctx, letters[i], point[0], point[1], r * 0.22, i === 3 ? face.ink : scaleInk, r, true)
@@ -219,7 +223,7 @@ Rectangle {
                 disc(ctx, x, y, radius, "#294259")
                 disc(ctx, x - radius * 0.26, y - radius * 0.30, radius * 0.22, "#45627a")
             }
-            const status = face.hasReading ? (active ? "Включено" : "Выключено") : "—"
+            const status = lampStatus
             textAt(ctx, status, width * 0.66, y, Math.min(23, height * 0.29), lit ? face.ink : scaleInk, width * 0.52, true)
         }
         function drawSegments(ctx) {

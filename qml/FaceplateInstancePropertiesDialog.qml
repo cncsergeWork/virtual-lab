@@ -13,7 +13,7 @@ Dialog {
     property string errorText: ""
     property var colorTarget: null
     property var propertyBindings: ({})
-    title: "Свойства экземпляра"
+    title: qsTr("Свойства экземпляра")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -24,11 +24,11 @@ Dialog {
 
     function propertyName(kind) {
         switch (kind) {
-        case "title": return "Подпись"
-        case "background": return "Цвет фона"
-        case "value": return "Цвет показания"
-        case "captionColor": return "Цвет подписи"
-        case "visible": return "Видимость"
+        case "title": return qsTr("Подпись")
+        case "background": return qsTr("Цвет фона")
+        case "value": return qsTr("Цвет показания")
+        case "captionColor": return qsTr("Цвет подписи")
+        case "visible": return qsTr("Видимость")
         default: return ""
         }
     }
@@ -86,7 +86,7 @@ Dialog {
             } else {
                 const value = row.textValue.trim()
                 if (!validColor(value)) {
-                    errorText = "Укажите цвет «" + row.name + "» в формате #RRGGBB."
+                    errorText = qsTr("Укажите цвет «") + row.name + qsTr("» в формате #RRGGBB.")
                     return
                 }
                 overrides[row.propertyId] = value
@@ -98,7 +98,7 @@ Dialog {
 
     ColorDialog {
         id: colorPicker
-        title: "Выбрать цвет"
+        title: qsTr("Выбрать цвет")
         onAccepted: {
             if (dialog.colorTarget) {
                 const color = selectedColor
@@ -126,7 +126,7 @@ Dialog {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             color: "#526579"
-            text: "Откройте тип и добавьте поля через «Интерфейс свойств…»."
+            text: qsTr("Откройте тип и добавьте поля через «Интерфейс свойств…».")
         }
         ListView {
             id: propertyList
@@ -161,8 +161,8 @@ Dialog {
                     objectName: "faceplatePropertyOwn_" + row.index
                     Layout.preferredWidth: 146
                     Layout.fillWidth: false
-                    text: "Своё значение"
-                    Accessible.name: "Своё значение для «" + row.model.name + "»"
+                    text: qsTr("Своё значение")
+                    Accessible.name: qsTr("Своё значение для «") + row.model.name + "»"
                     checked: row.model.ownValue
                     onCheckedChanged: if (checked !== row.model.ownValue)
                         fields.setProperty(row.index, "ownValue", checked)
@@ -183,7 +183,7 @@ Dialog {
                     Layout.fillWidth: true
                     enabled: row.model.ownValue
                     caption: row.model.name
-                    hint: row.model.ownValue ? "#RRGGBB" : "Авто"
+                    hint: row.model.ownValue ? "#RRGGBB" : qsTr("Авто")
                     text: row.model.ownValue ? row.model.textValue : row.model.defaultText
                     onTextChanged: if (visible && row.model.ownValue && text !== row.model.textValue)
                         fields.setProperty(row.index, "textValue", text)
@@ -193,7 +193,7 @@ Dialog {
                     objectName: "faceplatePropertyVisible_" + row.index
                     visible: row.model.propertyKind === "visible"
                     Layout.fillWidth: true
-                    text: "Показывать"
+                    text: qsTr("Показывать")
                     enabled: row.model.ownValue
                     checked: row.model.ownValue ? row.model.visibleValue : row.model.defaultVisible
                     onCheckedChanged: if (visible && row.model.ownValue && checked !== row.model.visibleValue)
@@ -202,10 +202,10 @@ Dialog {
                 ActionButton {
                     readonly property var bindingRule: dialog.propertyBindings[row.model.propertyId]
                     objectName: "faceplatePropertyBinding_" + row.index
-                    Accessible.name: "Динамическая привязка для «" + row.model.name + "»"
+                    Accessible.name: qsTr("Динамическая привязка для «") + row.model.name + "»"
                     visible: row.model.propertyKind !== "title"
                     Layout.preferredWidth: 112
-                    text: bindingRule?.tag ? "Настроено" : bindingRule ? "Выбрать тег…" : "По тегу…"
+                    text: bindingRule?.tag ? qsTr("Настроено") : bindingRule ? qsTr("Выбрать тег…") : qsTr("По тегу…")
                     onClicked: bindingDialog.edit(row.model.propertyId, row.model.name, row.model.propertyKind, bindingRule)
                 }
             }
@@ -220,10 +220,10 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Item { Layout.fillWidth: true }
-            ActionButton { objectName: "faceplatePropertiesCancel"; text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { objectName: "faceplatePropertiesCancel"; text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "faceplatePropertiesApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 enabled: fields.count > 0
                 highlighted: true
                 onClicked: dialog.save()

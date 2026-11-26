@@ -10,7 +10,7 @@ Dialog {
     property url pendingImage
     property bool clearImage: false
     readonly property var sizes: [
-        { label: "Свой размер" },
+        { label: qsTr("Свой размер") },
         { label: "1200 × 692", w: 1200, h: 692 },
         { label: "1024 × 768", w: 1024, h: 768 },
         { label: "1280 × 720", w: 1280, h: 720 },
@@ -18,7 +18,7 @@ Dialog {
         { label: "2560 × 1440", w: 2560, h: 1440 },
         { label: "3840 × 2160", w: 3840, h: 2160 }
     ]
-    title: "Свойства экрана"
+    title: qsTr("Свойства экрана")
     modal: true
     anchors.centerIn: parent
     width: Math.min(560, parent ? parent.width - 32 : 560)
@@ -47,7 +47,7 @@ Dialog {
     }
     ColorDialog {
         id: colors
-        title: "Цвет фона экрана"
+        title: qsTr("Цвет фона экрана")
         onAccepted: {
             const color = selectedColor
             background.setColor("#" + [color.r, color.g, color.b].map(channel =>
@@ -57,18 +57,18 @@ Dialog {
     FileDialog {
         id: pictures
         objectName: "screenImagePicker"
-        title: "Выбрать фоновое изображение"
-        nameFilters: ["Изображения (*.png *.jpg *.jpeg *.bmp)"]
+        title: qsTr("Выбрать фоновое изображение")
+        nameFilters: [qsTr("Изображения (*.png *.jpg *.jpeg *.bmp)")]
         onAccepted: { dialog.pendingImage = selectedFile; dialog.clearImage = false }
     }
     contentItem: ColumnLayout {
         spacing: 10
-        Field { id: screenName; caption: "Название экрана" }
+        Field { id: screenName; caption: qsTr("Название экрана") }
         RowLayout {
             Layout.fillWidth: true
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Размер мнемосхемы"; mode: "muted" }
+                LabelValue { text: qsTr("Размер мнемосхемы"); mode: "muted" }
                 ComboBox {
                     Layout.fillWidth: true
                     model: dialog.sizes
@@ -82,9 +82,9 @@ Dialog {
                     }
                 }
             }
-            Field { id: canvasWidth; objectName: "screenWidth"; caption: "Ширина, px"; Layout.preferredWidth: 105 }
-            Field { id: canvasHeight; objectName: "screenHeight"; caption: "Высота, px"; Layout.preferredWidth: 105 }
-            Field { id: gridStep; objectName: "screenGrid"; caption: "Шаг сетки, px"; Layout.preferredWidth: 95 }
+            Field { id: canvasWidth; objectName: "screenWidth"; caption: qsTr("Ширина, px"); Layout.preferredWidth: 105 }
+            Field { id: canvasHeight; objectName: "screenHeight"; caption: qsTr("Высота, px"); Layout.preferredWidth: 105 }
+            Field { id: gridStep; objectName: "screenGrid"; caption: qsTr("Шаг сетки, px"); Layout.preferredWidth: 95 }
         }
         RowLayout {
             Layout.fillWidth: true
@@ -92,18 +92,18 @@ Dialog {
                 id: scaleItems
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignBottom
-                text: "Масштабировать элементы"
+                text: qsTr("Масштабировать элементы")
                 ToolTip.visible: hovered
-                ToolTip.text: "Масштабировать размещённые элементы при изменении размера экрана"
+                ToolTip.text: qsTr("Масштабировать размещённые элементы при изменении размера экрана")
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "В операторском режиме"; mode: "muted" }
+                LabelValue { text: qsTr("В операторском режиме"); mode: "muted" }
                 ComboBox {
                     id: operatorFit
                     objectName: "screenOperatorFit"
                     Layout.fillWidth: true
-                    model: ["Заполнять окно", "Сохранять пропорции экрана"]
+                    model: [qsTr("Заполнять окно"), qsTr("Сохранять пропорции экрана")]
                 }
             }
         }
@@ -111,12 +111,12 @@ Dialog {
             Layout.fillWidth: true
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Цвет фона"; mode: "muted" }
+                LabelValue { text: qsTr("Цвет фона"); mode: "muted" }
                 ColorField {
                     id: background
                     objectName: "screenBackground"
                     Layout.fillWidth: true
-                    caption: "Цвет фона экрана"
+                    caption: qsTr("Цвет фона экрана")
                     onChoose: {
                         colors.selectedColor = /^#[0-9a-fA-F]{6}$/.test(background.text.trim()) ? background.text : "#f5f8fa"
                         colors.open()
@@ -125,12 +125,12 @@ Dialog {
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Размещение изображения"; mode: "muted" }
+                LabelValue { text: qsTr("Размещение изображения"); mode: "muted" }
                 ComboBox {
                     id: fit
                     Layout.fillWidth: true
                     enabled: !!dialog.pendingImage.toString() || (!dialog.clearImage && !!dialog.screen.backgroundImage)
-                    model: ["Заполнить с обрезкой", "Вписать целиком", "Растянуть"]
+                    model: [qsTr("Заполнить с обрезкой"), qsTr("Вписать целиком"), qsTr("Растянуть")]
                 }
             }
         }
@@ -138,20 +138,20 @@ Dialog {
             Layout.fillWidth: true
             ActionButton {
                 objectName: "screenChooseImage"
-                text: "Выбрать фон…"
+                text: qsTr("Выбрать фон…")
                 enabled: !!dialog.api.path
                 onClicked: pictures.open()
             }
             LabelValue {
                 text: dialog.pendingImage.toString() ? decodeURIComponent(dialog.pendingImage.toString().split("/").pop()) :
-                    !dialog.clearImage && dialog.screen.backgroundImage ? "Фоновое изображение" :
-                    dialog.api.path ? "Однотонный фон" : "Для изображения сначала сохраните проект"
+                    !dialog.clearImage && dialog.screen.backgroundImage ? qsTr("Фоновое изображение") :
+                    dialog.api.path ? qsTr("Однотонный фон") : qsTr("Для изображения сначала сохраните проект")
                 Layout.fillWidth: true
                 mode: "muted"
             }
             ActionButton {
                 objectName: "screenRemoveImage"
-                text: "Убрать изображение"
+                text: qsTr("Убрать изображение")
                 enabled: fit.enabled
                 onClicked: { dialog.pendingImage = ""; dialog.clearImage = true }
             }
@@ -159,8 +159,8 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: dialog.close() }
-            ActionButton { objectName: "screenPropertiesSave"; text: "Применить"; highlighted: true; onClicked: dialog.save() }
+            ActionButton { text: qsTr("Отмена"); onClicked: dialog.close() }
+            ActionButton { objectName: "screenPropertiesSave"; text: qsTr("Применить"); highlighted: true; onClicked: dialog.save() }
         }
     }
 }

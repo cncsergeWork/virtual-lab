@@ -9,16 +9,16 @@ Dialog {
     objectName: "faceplatePropertyInterfaceDialog"
     required property var api
     readonly property var kinds: [
-        { id: "title", name: "Подпись" },
-        { id: "background", name: "Цвет фона" },
-        { id: "value", name: "Цвет показания" },
-        { id: "captionColor", name: "Цвет подписи" },
-        { id: "visible", name: "Видимость" }
+        { id: "title", name: qsTr("Подпись") },
+        { id: "background", name: qsTr("Цвет фона") },
+        { id: "value", name: qsTr("Цвет показания") },
+        { id: "captionColor", name: qsTr("Цвет подписи") },
+        { id: "visible", name: qsTr("Видимость") }
     ]
     property string typeName: ""
     property var items: []
     property string errorText: ""
-    title: "Интерфейс свойств"
+    title: qsTr("Интерфейс свойств")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -35,7 +35,7 @@ Dialog {
         items = children.map((item, index) => ({
             id: item.id,
             name: names[index] && names.indexOf(names[index]) === names.lastIndexOf(names[index])
-                ? names[index] : (names[index] || "Элемент") + " · " + (index + 1)
+                ? names[index] : (names[index] || qsTr("Элемент")) + " · " + (index + 1)
         }))
         errorText = ""
         properties.clear()
@@ -58,12 +58,12 @@ Dialog {
             const nameKey = name.toLocaleLowerCase()
             const target = row.itemId + "/" + row.propertyKind
             if (!name || !row.itemId) {
-                errorText = "Укажите имя и элемент для каждого свойства."
+                errorText = qsTr("Укажите имя и элемент для каждого свойства.")
                 return
             }
             if (names.has(nameKey) || targets.has(target)) {
-                errorText = names.has(nameKey) ? "Имена свойств должны различаться." :
-                    "Одно свойство элемента можно добавить в интерфейс один раз."
+                errorText = names.has(nameKey) ? qsTr("Имена свойств должны различаться.") :
+                    qsTr("Одно свойство элемента можно добавить в интерфейс один раз.")
                 return
             }
             names.add(nameKey)
@@ -82,16 +82,16 @@ Dialog {
         RowLayout {
             visible: properties.count > 0
             Layout.fillWidth: true
-            LabelValue { text: "Имя в экземпляре"; Layout.fillWidth: true }
-            LabelValue { text: "Элемент типа"; Layout.preferredWidth: 215 }
-            LabelValue { text: "Свойство"; Layout.preferredWidth: 148 }
-            LabelValue { text: "Видимость по типу"; Layout.preferredWidth: 132 }
+            LabelValue { text: qsTr("Имя в экземпляре"); Layout.fillWidth: true }
+            LabelValue { text: qsTr("Элемент типа"); Layout.preferredWidth: 215 }
+            LabelValue { text: qsTr("Свойство"); Layout.preferredWidth: 148 }
+            LabelValue { text: qsTr("Видимость по типу"); Layout.preferredWidth: 132 }
             Item { Layout.preferredWidth: 38 }
         }
         LabelValue {
             visible: properties.count === 0
-            text: dialog.items.length ? "Добавьте свойства, доступные у экземпляров этого типа." :
-                "Добавьте на холст типа элемент, чтобы открыть его свойства для экземпляров."
+            text: dialog.items.length ? qsTr("Добавьте свойства, доступные у экземпляров этого типа.") :
+                qsTr("Добавьте на холст типа элемент, чтобы открыть его свойства для экземпляров.")
             mode: "muted"
             Layout.fillWidth: true
         }
@@ -112,10 +112,10 @@ Dialog {
                 height: 36
                 TextField {
                     objectName: "propertyInterfaceName_" + row.index
-                    Accessible.name: "Имя свойства в экземпляре"
+                    Accessible.name: qsTr("Имя свойства в экземпляре")
                     Layout.fillWidth: true
                     Layout.minimumWidth: 72
-                    placeholderText: "Например, Заголовок"
+                    placeholderText: qsTr("Например, Заголовок")
                     maximumLength: 80
                     text: row.model.propertyName
                     onTextChanged: if (text !== row.model.propertyName)
@@ -123,7 +123,7 @@ Dialog {
                 }
                 ComboBox {
                     objectName: "propertyInterfaceItem_" + row.index
-                    Accessible.name: "Элемент типа"
+                    Accessible.name: qsTr("Элемент типа")
                     Layout.preferredWidth: 215
                     Layout.minimumWidth: 86
                     model: dialog.items
@@ -137,7 +137,7 @@ Dialog {
                 }
                 ComboBox {
                     objectName: "propertyInterfaceKind_" + row.index
-                    Accessible.name: "Свойство элемента"
+                    Accessible.name: qsTr("Свойство элемента")
                     Layout.preferredWidth: 148
                     model: dialog.kinds
                     textRole: "name"
@@ -151,7 +151,7 @@ Dialog {
                         objectName: "propertyInterfaceDefaultVisible_" + row.index
                         anchors.verticalCenter: parent.verticalCenter
                         visible: row.model.propertyKind === "visible"
-                        text: "Показывать"
+                        text: qsTr("Показывать")
                         checked: row.model.defaultVisible
                         onCheckedChanged: if (checked !== row.model.defaultVisible)
                             properties.setProperty(row.index, "defaultVisible", checked)
@@ -161,7 +161,7 @@ Dialog {
                     compact: true
                     text: "×"
                     objectName: "propertyInterfaceRemove_" + row.index
-                    Accessible.name: "Удалить свойство из интерфейса"
+                    Accessible.name: qsTr("Удалить свойство из интерфейса")
                     onClicked: properties.remove(row.index)
                 }
             }
@@ -177,7 +177,7 @@ Dialog {
             Layout.fillWidth: true
             ActionButton {
                 objectName: "propertyInterfaceAdd"
-                text: "+ Свойство"
+                text: qsTr("+ Свойство")
                 enabled: dialog.items.length > 0 && properties.count < 128
                 onClicked: {
                     properties.append({ propertyId: "", propertyName: "", itemId: dialog.items[0].id,
@@ -186,10 +186,10 @@ Dialog {
                 }
             }
             Item { Layout.fillWidth: true }
-            ActionButton { objectName: "propertyInterfaceCancel"; text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { objectName: "propertyInterfaceCancel"; text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "propertyInterfaceApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 highlighted: true
                 onClicked: dialog.save()
             }

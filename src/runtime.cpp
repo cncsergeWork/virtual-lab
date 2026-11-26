@@ -2,6 +2,7 @@
 
 #include "drivers.h"
 #include "project.h"
+#include <QCoreApplication>
 #include <QDateTime>
 #include <QJsonArray>
 #include <QSaveFile>
@@ -51,11 +52,11 @@ Runtime::~Runtime()
 bool Runtime::openArchive(const QString &path, const QString &projectId, QString &error)
 {
     if (running_) {
-        error = "Остановите опрос перед сменой архива.";
+        error = QCoreApplication::translate("Runtime", "Остановите опрос перед сменой архива.");
         return false;
     }
     if (!flush()) {
-        error = "Не удалось сохранить накопленные данные архива.";
+        error = QCoreApplication::translate("Runtime", "Не удалось сохранить накопленные данные архива.");
         return false;
     }
     const auto connection = Project::id();
@@ -155,7 +156,7 @@ void Runtime::start(const QJsonObject &project)
                     finishWidgetRead(token, accepted, value, detail);
                 }, Qt::QueuedConnection);
             } else if (!accepted) {
-                emit warning(QString("Не удалось прочитать тег «%1». %2").arg(tags_.value(id).value("name").toString(), detail));
+                emit warning(QCoreApplication::translate("Runtime", "Не удалось прочитать тег «%1». %2").arg(tags_.value(id).value("name").toString(), detail));
             }
         });
         connect(driver, &DataSource::writeFinished, this,
@@ -183,7 +184,7 @@ void Runtime::stop()
     }
     for (auto it = tags_.cbegin(); it != tags_.cend(); ++it) {
         if (readings_.value(it.key()).toMap().value("hasValue").toBool())
-            accept(it.key(), 0, Quality::Stale, "Опрос остановлен.");
+            accept(it.key(), 0, Quality::Stale, QCoreApplication::translate("Runtime", "Опрос остановлен."));
     }
     running_ = false;
     statuses_.clear();
@@ -233,11 +234,11 @@ void Runtime::evaluateAlarm(const QJsonObject &tag, double value, qint64 now)
     if (!active && (high ? value >= limit : value <= limit)) {
         activeAlarms_.insert(id, {{"tag", id}, {"name", tag.value("name").toString()},
                                   {"time", now}, {"ack", false}, {"high", high}, {"limit", limit}});
-        log(id, "alarm_on", QString("%1 %2").arg(high ? "Верхний порог" : "Нижний порог", QString::number(limit)));
+        log(id, "alarm_on", QString("%1 %2").arg(high ? QCoreApplication::translate("Runtime", "Верхний порог") : QCoreApplication::translate("Runtime", "Нижний порог"), QString::number(limit)));
         emit alarmsChanged();
     } else if (active && (high ? value < limit - hysteresis : value > limit + hysteresis)) {
         activeAlarms_.remove(id);
-        log(id, "alarm_off", "Значение вернулось в допустимый диапазон.");
+        log(id, "alarm_off", QCoreApplication::translate("Runtime", "Значение вернулось в допустимый диапазон."));
         emit alarmsChanged();
     }
 }
@@ -245,11 +246,11 @@ void Runtime::evaluateAlarm(const QJsonObject &tag, double value, qint64 now)
 QString Runtime::acknowledge(const QString &tagId)
 {
     if (!activeAlarms_.contains(tagId))
-        return "Эта тревога уже снята.";
+        return QCoreApplication::translate("Runtime", "Эта тревога уже снята.");
     auto &alarm = activeAlarms_[tagId];
     if (!alarm.value("ack").toBool()) {
         alarm.insert("ack", true);
-        log(tagId, "alarm_ack", "Тревога квитирована.");
+        log(tagId, "alarm_ack", QCoreApplication::translate("Runtime", "Тревога квитирована."));
         emit alarmsChanged();
         emit updated();
     }
@@ -277,13 +278,13 @@ QString Runtime::requestRead(const QString &tagId, quint64 token)
 {
     const auto tag = tags_.value(tagId);
     if (tag.isEmpty())
-        return "Тег не найден.";
+        return QCoreApplication::translate("Runtime", "Тег не найден.");
     const auto sourceId = tag.value("source").toString();
     if (!running_ || !sources_.contains(sourceId))
-        return "Запустите опрос источника.";
+        return QCoreApplication::translate("Runtime", "Запустите опрос источника.");
     const auto error = sources_.value(sourceId)->read(tag, token);
     if (error.isEmpty())
-        log(tagId, "read_request", "Запрошено внеочередное чтение тега.");
+        log(tagId, "read_request", QCoreApplication::translate("Runtime", "Запрошено внеочередное чтение тега."));
     return error;
 }
 
@@ -313,7 +314,7 @@ void Runtime::runWidgetActions(const QString &widgetId, const QVariantList &rows
         const double value = row.value("value").toDouble(&numeric);
         if (tag.isEmpty() || (!read && operation != "write")
             || (!read && valueTag.isEmpty() && (row.contains("valueTag") || !numeric || !std::isfinite(value)))) {
-            emit warning("Проверьте тег и значение действия виджета.");
+            emit warning(QCoreApplication::translate("Runtime", "Проверьте тег и значение действия виджета."));
             continue;
         }
         actions.append(WidgetAction{tag, valueTag, value, sourceEpoch(tag), sourceEpoch(valueTag), read});
@@ -325,7 +326,7 @@ void Runtime::runWidgetActions(const QString &widgetId, const QVariantList &rows
     if (queue.actions.size() + actions.size() > maxWidgetActions) {
         if (queue.actions.isEmpty() && !queue.waitingForRead)
             widgetQueues_.remove(widgetId);
-        emit warning("Очередь действий виджета заполнена.");
+        emit warning(QCoreApplication::translate("Runtime", "Очередь действий виджета заполнена."));
         return;
     }
     queue.actions.append(actions);
@@ -344,7 +345,7 @@ void Runtime::advanceWidgetActions(const QString &widgetId)
         }
         const auto action = queue->actions.takeFirst();
         if (!actionStillConnected(action)) {
-            reportWidgetError(action, "Команда отменена после потери связи.");
+            reportWidgetError(action, QCoreApplication::translate("Runtime", "Команда отменена после потери связи."));
             continue;
         }
         if (action.read || action.valueTag.isEmpty()) {
@@ -355,7 +356,7 @@ void Runtime::advanceWidgetActions(const QString &widgetId)
         const auto origin = tags_.value(action.valueTag);
         auto *driver = sources_.value(origin.value("source").toString());
         if (!driver || origin.value("address").toObject().value("type") == "text") {
-            reportWidgetError(action, "Выберите числовой или логический тег для значения.");
+            reportWidgetError(action, QCoreApplication::translate("Runtime", "Выберите числовой или логический тег для значения."));
             continue;
         }
         if (driver->supportsRead()) {
@@ -374,7 +375,7 @@ void Runtime::advanceWidgetActions(const QString &widgetId)
         bool numeric = false;
         const double value = reading.value("value").toDouble(&numeric);
         if (reading.value("quality") != "good" || !reading.value("hasValue").toBool() || !numeric || !std::isfinite(value)) {
-            reportWidgetError(action, "Тег значения пока не получил актуальных данных.");
+            reportWidgetError(action, QCoreApplication::translate("Runtime", "Тег значения пока не получил актуальных данных."));
             continue;
         }
         reportWidgetError(action, requestWrite(action.tag, value));
@@ -392,9 +393,9 @@ void Runtime::finishWidgetRead(quint64 token, bool accepted, double value, const
     queue->waitingForRead = false;
     const auto &action = pending.action;
     if (!actionStillConnected(action))
-        reportWidgetError(action, "Команда отменена после потери связи.");
+        reportWidgetError(action, QCoreApplication::translate("Runtime", "Команда отменена после потери связи."));
     else if (!accepted || !std::isfinite(value))
-        reportWidgetError(action, detail.isEmpty() ? "Не получено актуальное значение." : detail);
+        reportWidgetError(action, detail.isEmpty() ? QCoreApplication::translate("Runtime", "Не получено актуальное значение.") : detail);
     else
         reportWidgetError(action, requestWrite(action.tag, value));
     advanceWidgetActions(pending.widgetId);
@@ -408,7 +409,7 @@ void Runtime::reportWidgetError(const WidgetAction &action, const QString &detai
         emit warning(detail);
         return;
     }
-    const auto message = QString("Не удалось записать тег «%1» из «%2». %3")
+    const auto message = QCoreApplication::translate("Runtime", "Не удалось записать тег «%1» из «%2». %3")
         .arg(tags_.value(action.tag).value("name").toString(), tags_.value(action.valueTag).value("name").toString(), detail);
     log(action.tag, "write_error", message);
     emit warning(message);
@@ -419,14 +420,14 @@ QString Runtime::requestWrite(const QString &tagId, double value)
     const auto tag = tags_.value(tagId);
     const auto sourceId = tag.value("source").toString();
     if (!running_ || !sources_.contains(sourceId))
-        return "Запустите опрос источника.";
+        return QCoreApplication::translate("Runtime", "Запустите опрос источника.");
     if (!tag.value("writable").toBool() || !sourceSettings_.value(sourceId).value("allowWrite").toBool())
-        return "Разрешите запись в настройках источника и тега.";
+        return QCoreApplication::translate("Runtime", "Разрешите запись в настройках источника и тега.");
     if (readings_.value(tagId).toMap().value("quality").toString() != "good")
-        return "Запись доступна после успешного чтения тега.";
+        return QCoreApplication::translate("Runtime", "Запись доступна после успешного чтения тега.");
     const auto error = sources_.value(sourceId)->write(tag, value);
     if (error.isEmpty())
-        log(tagId, "write_request", QString("Запрошена запись значения %1.").arg(QString::number(value, 'g', 12)));
+        log(tagId, "write_request", QCoreApplication::translate("Runtime", "Запрошена запись значения %1.").arg(QString::number(value, 'g', 12)));
     return error;
 }
 
@@ -474,7 +475,7 @@ bool Runtime::flush()
     }
     if (!ok) {
         if (!std::exchange(archiveError_, true))
-            emit warning("Ошибка архива SQLite. Проверьте доступ к папке проекта и свободное место.");
+            emit warning(QCoreApplication::translate("Runtime", "Ошибка архива SQLite. Проверьте доступ к папке проекта и свободное место."));
         return false;
     }
     archiveError_ = false;
@@ -580,9 +581,9 @@ QVariantMap Runtime::archiveSamples(const QStringList &tags, qint64 time)
 QString Runtime::exportCsv(const QString &path, const QString &tag, qint64 from, qint64 to)
 {
     if (tag.isEmpty() || from >= to || !db_.isOpen())
-        return "Выберите тег и диапазон архива.";
+        return QCoreApplication::translate("Runtime", "Выберите тег и диапазон архива.");
     if (!flush())
-        return "Не удалось сохранить накопленные данные архива.";
+        return QCoreApplication::translate("Runtime", "Не удалось сохранить накопленные данные архива.");
     QSqlQuery query(db_);
     query.setForwardOnly(true);
     query.prepare("SELECT time,value,quality FROM samples WHERE owner=? AND tag=? AND time BETWEEN ? AND ? "

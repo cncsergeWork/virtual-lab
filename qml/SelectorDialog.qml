@@ -5,7 +5,7 @@ import QtQuick.Layouts
 Dialog {
     id: dialog
     required property var api
-    title: "Положения переключателя"
+    title: qsTr("Положения переключателя")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -14,15 +14,15 @@ Dialog {
 
     function edit(positions) {
         rows.clear()
-        for (const position of positions || [{ label: "Стоп", value: 0 }, { label: "Ручной", value: 1 }, { label: "Авто", value: 2 }])
+        for (const position of positions || [{ label: qsTr("Стоп"), value: 0 }, { label: qsTr("Ручной"), value: 1 }, { label: qsTr("Авто"), value: 2 }])
             rows.append({ label: position.label, entry: String(position.value) })
         open()
     }
 
     contentItem: ColumnLayout {
         RowLayout {
-            LabelValue { text: "Название режима"; Layout.fillWidth: true }
-            LabelValue { text: "Значение"; Layout.preferredWidth: 108 }
+            LabelValue { text: qsTr("Название режима"); Layout.fillWidth: true }
+            LabelValue { text: qsTr("Значение"); Layout.preferredWidth: 108 }
             Item { Layout.preferredWidth: 36 }
         }
         Repeater {
@@ -49,14 +49,14 @@ Dialog {
         RowLayout {
             ActionButton {
                 objectName: "selectorAdd"
-                text: "+ Положение"; enabled: rows.count < 6
+                text: qsTr("+ Положение"); enabled: rows.count < 6
                 onClicked: rows.append({ label: "", entry: "" })
             }
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "selectorApply"
-                text: "Применить"; highlighted: true
+                text: qsTr("Применить"); highlighted: true
                 onClicked: {
                     const positions = []
                     for (let i = 0; i < rows.count; ++i) {

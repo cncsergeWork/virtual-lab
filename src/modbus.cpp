@@ -1,5 +1,6 @@
 #include "modbus.h"
 
+#include <QCoreApplication>
 #include <QHostAddress>
 #include <QRegularExpression>
 #include <algorithm>
@@ -59,15 +60,15 @@ QString Modbus::validateSource(const QJsonObject &source)
     const auto host = settings.value("host").toString();
     const static QRegularExpression hostname("^[a-zA-Z0-9_](?:[a-zA-Z0-9_.-]{0,252})$");
     if (host.isEmpty() || (QHostAddress(host).isNull() && !hostname.match(host).hasMatch()))
-        return "Укажите IP-адрес или имя узла без номера порта.";
+        return QCoreApplication::translate("Modbus", "Укажите IP-адрес или имя узла без номера порта.");
     if (!integer(settings.value("port"), 1, 65535))
-        return "Порт должен быть целым числом от 1 до 65535.";
+        return QCoreApplication::translate("Modbus", "Порт должен быть целым числом от 1 до 65535.");
     if (!integer(settings.value("pollMs"), 100, 60000) || !integer(settings.value("timeoutMs"), 100, 30000))
-        return "Период опроса должен быть 100–60000 мс, тайм-аут — 100–30000 мс.";
+        return QCoreApplication::translate("Modbus", "Период опроса должен быть 100–60000 мс, тайм-аут — 100–30000 мс.");
     if (!settings.value("allowWrite").isBool())
-        return "Укажите, разрешена ли запись.";
+        return QCoreApplication::translate("Modbus", "Укажите, разрешена ли запись.");
     if (settings.value("simulator").toBool() && host != "127.0.0.1")
-        return "Встроенный симулятор работает только на 127.0.0.1.";
+        return QCoreApplication::translate("Modbus", "Встроенный симулятор работает только на 127.0.0.1.");
     return {};
 }
 
@@ -78,26 +79,26 @@ QString Modbus::validateTag(const QJsonObject &tag)
     const auto type = address.value("type").toString();
     const auto order = address.value("order").toString();
     if (registerType == QModbusDataUnit::Invalid)
-        return "Выберите таблицу Modbus.";
+        return QCoreApplication::translate("Modbus", "Выберите таблицу Modbus.");
     if (!integer(address.value("unit"), 1, 255)
         || !integer(address.value("offset"), 0, 65536 - width(address)))
-        return "Unit ID должен быть 1–255, адрес — смещением с нуля в пределах таблицы.";
+        return QCoreApplication::translate("Modbus", "Unit ID должен быть 1–255, адрес — смещением с нуля в пределах таблицы.");
     if (registerBit(registerType) ? type != "bool"
         : (type != "u16" && type != "i16" && type != "u32" && type != "i32" && type != "f32"))
-        return "Выбранный тип данных несовместим с таблицей Modbus.";
+        return QCoreApplication::translate("Modbus", "Выбранный тип данных несовместим с таблицей Modbus.");
     if (order != "ABCD" && order != "BADC" && order != "CDAB" && order != "DCBA")
-        return "Выберите порядок байтов и слов.";
+        return QCoreApplication::translate("Modbus", "Выберите порядок байтов и слов.");
     const auto scale = tag.value("scale");
     const auto bias = tag.value("bias");
     if (!scale.isDouble() || !bias.isDouble() || !std::isfinite(scale.toDouble())
         || scale.toDouble() == 0 || !std::isfinite(bias.toDouble()))
-        return "Масштаб должен быть конечным и ненулевым, смещение — конечным.";
+        return QCoreApplication::translate("Modbus", "Масштаб должен быть конечным и ненулевым, смещение — конечным.");
     if (type == "bool" && (scale.toDouble() != 1 || bias.toDouble() != 0))
-        return "Для битового тега задайте масштаб 1 и смещение 0.";
+        return QCoreApplication::translate("Modbus", "Для битового тега задайте масштаб 1 и смещение 0.");
     if (!tag.value("writable").isBool() ||
         (tag.value("writable").toBool() && registerType != QModbusDataUnit::HoldingRegisters
          && registerType != QModbusDataUnit::Coils))
-        return "Запись доступна только для Coils и Holding Registers.";
+        return QCoreApplication::translate("Modbus", "Запись доступна только для Coils и Holding Registers.");
     return {};
 }
 
@@ -135,13 +136,13 @@ bool Modbus::encode(const QJsonObject &tag, double value, QList<quint16> &words,
     const double raw = (value - tag.value("bias").toDouble()) / tag.value("scale").toDouble();
     const double rounded = std::round(raw);
     if (!std::isfinite(raw)) {
-        error = "Значение выходит за диапазон типа.";
+        error = QCoreApplication::translate("Modbus", "Значение выходит за диапазон типа.");
         return false;
     }
     quint32 bits = 0;
     if (type == "f32") {
         if (std::abs(raw) > std::numeric_limits<float>::max()) {
-            error = "Значение выходит за диапазон Float32.";
+            error = QCoreApplication::translate("Modbus", "Значение выходит за диапазон Float32.");
             return false;
         }
         bits = std::bit_cast<quint32>(static_cast<float>(raw));
@@ -153,7 +154,7 @@ bool Modbus::encode(const QJsonObject &tag, double value, QList<quint16> &words,
         else if (type == "u32") max = 4294967295.0;
         else if (type == "i32") { min = -2147483648.0; max = 2147483647.0; }
         if (std::abs(raw - rounded) > 0.000001 || rounded < min || rounded > max) {
-            error = "Значение не представимо целым числом с заданным масштабом и типом.";
+            error = QCoreApplication::translate("Modbus", "Значение не представимо целым числом с заданным масштабом и типом.");
             return false;
         }
         bits = static_cast<quint32>(static_cast<qint64>(rounded));
@@ -187,7 +188,7 @@ ModbusSource::ModbusSource(const QJsonObject &source, const QList<QJsonObject> &
             emit statusChanged("connected", {});
             QMetaObject::invokeMethod(this, &ModbusSource::poll, Qt::QueuedConnection);
         } else if (state == QModbusDevice::UnconnectedState) {
-            const auto detail = QString("Нет связи с устройством.");
+            const auto detail = QCoreApplication::translate("Modbus", "Нет связи с устройством.");
             cancelRequests(detail);
             emit statusChanged("disconnected", detail);
             report(tags_, Quality::Stale, detail);
@@ -251,7 +252,7 @@ void ModbusSource::stop()
 {
     running_ = false;
     pollTimer_.stop();
-    cancelRequests("Опрос остановлен.");
+    cancelRequests(QCoreApplication::translate("Modbus", "Опрос остановлен."));
     client_.disconnectDevice();
 }
 
@@ -315,7 +316,7 @@ void ModbusSource::sendRead(const Group &group)
     if (!reply) {
         auto detail = client_.errorString();
         if (detail.isEmpty())
-            detail = "Не удалось отправить запрос чтения.";
+            detail = QCoreApplication::translate("Modbus", "Не удалось отправить запрос чтения.");
         report(group.tags, Quality::Error, detail);
         if (!tagId.isEmpty())
             emit readFinished(tagId, false, detail, group.readToken, 0);
@@ -359,9 +360,9 @@ void ModbusSource::consume(QModbusReply *reply, const Group &group)
             const auto words = values.sliced(address.value("offset").toInt() - group.first, Modbus::width(address));
             double value = 0;
             const bool valid = Modbus::decode(tag, words, value);
-            const auto detail = valid ? QString{} : QString("Некорректное числовое значение в ответе.");
+            const auto detail = valid ? QString{} : QCoreApplication::translate("Modbus", "Некорректное числовое значение в ответе.");
             emit sample(tag.value("id").toString(), value, valid ? Quality::Good : Quality::Error, detail);
-            complete(valid, valid ? QString("Значение прочитано.") : detail, value);
+            complete(valid, valid ? QCoreApplication::translate("Modbus", "Значение прочитано.") : detail, value);
         }
     } else if (reply->error() == QModbusDevice::ProtocolError && group.tags.size() > 1
                && (reply->rawResult().exceptionCode() == QModbusPdu::IllegalDataAddress
@@ -369,7 +370,7 @@ void ModbusSource::consume(QModbusReply *reply, const Group &group)
         for (auto it = group.tags.crbegin(); it != group.tags.crend(); ++it)
             pending_.prepend(tagGroup(*it));
     } else if (reply->error() == QModbusDevice::TimeoutError || reply->error() == QModbusDevice::ReplyAbortedError) {
-        const auto detail = reply->errorString().isEmpty() ? QString("Нет ответа на чтение.") : reply->errorString();
+        const auto detail = reply->errorString().isEmpty() ? QCoreApplication::translate("Modbus", "Нет ответа на чтение.") : reply->errorString();
         cancelQueue(detail);
         report(group.tags, Quality::Stale, detail);
         complete(false, detail);
@@ -380,7 +381,7 @@ void ModbusSource::consume(QModbusReply *reply, const Group &group)
             return true;
         });
     } else {
-        const auto detail = reply->errorString().isEmpty() ? QString("Неверная длина ответа Modbus.") : reply->errorString();
+        const auto detail = reply->errorString().isEmpty() ? QCoreApplication::translate("Modbus", "Неверная длина ответа Modbus.") : reply->errorString();
         report(group.tags, Quality::Error, detail);
         complete(false, detail);
     }
@@ -390,10 +391,10 @@ void ModbusSource::consume(QModbusReply *reply, const Group &group)
 QString ModbusSource::enqueue(Action action)
 {
     if (!running_ || client_.state() != QModbusDevice::ConnectedState)
-        return "Источник не подключён.";
+        return QCoreApplication::translate("Modbus", "Источник не подключён.");
     constexpr int maxQueuedActions = 64;
     if (actions_.size() >= maxQueuedActions)
-        return "Очередь команд Modbus заполнена.";
+        return QCoreApplication::translate("Modbus", "Очередь команд Modbus заполнена.");
     actions_.append(std::move(action));
     if (!readReply_ && !writeReply_ && actions_.size() == 1)
         QMetaObject::invokeMethod(this, &ModbusSource::next, Qt::QueuedConnection);
@@ -421,7 +422,7 @@ QString ModbusSource::write(const QJsonObject &tag, double value)
 
 void ModbusSource::cancelQueue(const QString &detail)
 {
-    const auto reason = QString("Команда отменена до отправки. %1").arg(detail);
+    const auto reason = QCoreApplication::translate("Modbus", "Команда отменена до отправки. %1").arg(detail);
     const auto actions = std::exchange(actions_, {});
     for (const auto &action : actions) {
         if (const auto *request = std::get_if<Write>(&action))
@@ -444,7 +445,7 @@ void ModbusSource::cancelRequests(const QString &detail)
     if (!readTagId.isEmpty())
         emit readFinished(readTagId, false, detail, token, 0);
     if (!writeTagId.isEmpty())
-        emit writeFinished(writeTagId, false, QString("Результат записи неизвестен. %1").arg(detail));
+        emit writeFinished(writeTagId, false, QCoreApplication::translate("Modbus", "Результат записи неизвестен. %1").arg(detail));
     cancelQueue(detail);
 }
 
@@ -452,7 +453,7 @@ QString ModbusSource::sendWrite(const Write &request)
 {
     auto *reply = client_.sendWriteRequest(request.data, request.unit);
     if (!reply)
-        return client_.errorString().isEmpty() ? QString("Не удалось отправить запрос.") : client_.errorString();
+        return client_.errorString().isEmpty() ? QCoreApplication::translate("Modbus", "Не удалось отправить запрос.") : client_.errorString();
     writeReply_ = reply;
     writeTagId_ = request.tagId;
     const auto finish = [this, reply] {
@@ -463,9 +464,9 @@ QString ModbusSource::sendWrite(const Write &request)
         const auto tagId = std::exchange(writeTagId_, {});
         const auto error = reply->error();
         const auto accepted = error == QModbusDevice::NoError;
-        const auto detail = accepted ? QString("Устройство подтвердило запись.")
+        const auto detail = accepted ? QCoreApplication::translate("Modbus", "Устройство подтвердило запись.")
             : (error == QModbusDevice::ProtocolError ? reply->errorString()
-                : QString("Результат записи неизвестен. %1").arg(reply->errorString()));
+                : QCoreApplication::translate("Modbus", "Результат записи неизвестен. %1").arg(reply->errorString()));
         emit writeFinished(tagId, accepted, detail);
         if (!accepted && error != QModbusDevice::ProtocolError)
             cancelQueue(detail);

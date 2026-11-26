@@ -44,7 +44,7 @@ Item {
         anchors.fill: parent
         anchors.margins: 8
         visible: content.childrenConfigs.length === 0 && (content.owner?.editing ?? false)
-        text: content.definition?.name || "Фейсплейс"
+        text: content.definition?.name || qsTr("Фейсплейс")
         color: content.owner?.secondary ?? "#506479"
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter

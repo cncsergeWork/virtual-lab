@@ -112,7 +112,7 @@ Item {
         const elapsed = to - from
         if (relativeTime) {
             const seconds = Number((elapsed * (1 - fraction) / 1000).toPrecision(4))
-            return (seconds ? "−" : "") + seconds + " с"
+            return (seconds ? "−" : "") + seconds + qsTr(" с")
         }
         return Qt.formatDateTime(new Date(from + elapsed * fraction),
             elapsed >= 86400000 ? "dd.MM HH:mm" : elapsed <= 300000 ? "HH:mm:ss" : "HH:mm")
@@ -278,7 +278,7 @@ Item {
         anchors.centerIn: parent
         visible: chart.visibleSeriesCount === 0 && (!chart.operatorStyle || !chart.seriesDefinitions.length)
         color: chart.axisInk
-        text: chart.tag || chart.seriesDefinitions.length ? "Нет записей за этот период" : "Выберите теги"
+        text: chart.tag || chart.seriesDefinitions.length ? qsTr("Нет записей за этот период") : qsTr("Выберите теги")
         font.pixelSize: 14
     }
 }

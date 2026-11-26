@@ -61,8 +61,8 @@ ColumnLayout {
         if (cursor) return Qt.formatDateTime(new Date(cursor), "dd.MM HH:mm:ss.zzz")
         if (following) {
             const seconds = Math.round(span / 1000)
-            return "Последние " + (seconds % 3600 === 0 ? (seconds / 3600) + " ч" :
-                seconds % 60 === 0 && seconds > 60 ? (seconds / 60) + " мин" : seconds + " с")
+            return qsTr("Последние ") + (seconds % 3600 === 0 ? (seconds / 3600) + qsTr(" ч") :
+                seconds % 60 === 0 && seconds > 60 ? (seconds / 60) + qsTr(" мин") : seconds + qsTr(" с"))
         }
         const format = span >= 86400000 ? "dd.MM HH:mm" : "HH:mm:ss"
         return Qt.formatDateTime(new Date(startTime), format) + " – " + Qt.formatDateTime(new Date(endTime), format)
@@ -82,8 +82,8 @@ ColumnLayout {
     }
     function display(row) {
         const reading = cursor ? snapshot[row.tag] : api.readings[row.tag]
-        if (reading?.quality === "stale") return "устар."
-        if (reading?.quality === "error") return "ошибка"
+        if (reading?.quality === "stale") return qsTr("устар.")
+        if (reading?.quality === "error") return qsTr("ошибка")
         if (!reading?.hasValue) return "—"
         const unit = findTag(row.tag).units || ""
         return Number(Number(reading.value).toPrecision(7)).toLocaleString(Qt.locale(), "g", 7) + (unit ? " " + unit : "")
@@ -112,7 +112,7 @@ ColumnLayout {
             hoverEnabled: true
             topPadding: 1; bottomPadding: 1
             text: chart.periodLabel()
-            Accessible.name: "Период графика. " + text
+            Accessible.name: qsTr("Период графика. ") + text
             contentItem: Label {
                 text: parent.text
                 color: chart.ink
@@ -122,14 +122,14 @@ ColumnLayout {
             onClicked: if (plot.periodMenu) navigationMenu.popup()
             ToolTip.visible: hovered && plot.periodMenu
             ToolTip.delay: 500
-            ToolTip.text: "Выбрать период"
+            ToolTip.text: qsTr("Выбрать период")
         }
     }
     Menu {
         id: navigationMenu
-        MenuItem { objectName: "dashboardTrendLive"; text: "К текущему времени"; onTriggered: chart.follow() }
-        MenuItem { objectName: "dashboardTrendFit"; text: "Весь доступный архив"; onTriggered: chart.fitAll() }
-        MenuItem { objectName: "dashboardTrendInterval"; text: "Выбрать период…"; onTriggered: rangeDialog.edit() }
+        MenuItem { objectName: "dashboardTrendLive"; text: qsTr("К текущему времени"); onTriggered: chart.follow() }
+        MenuItem { objectName: "dashboardTrendFit"; text: qsTr("Весь доступный архив"); onTriggered: chart.fitAll() }
+        MenuItem { objectName: "dashboardTrendInterval"; text: qsTr("Выбрать период…"); onTriggered: rangeDialog.edit() }
     }
     ArchivePlot {
         id: plot
@@ -206,7 +206,7 @@ ColumnLayout {
     }
     Dialog {
         id: rangeDialog
-        title: "Период графика"
+        title: qsTr("Период графика")
         parent: Overlay.overlay
         anchors.centerIn: parent
         width: 440
@@ -223,10 +223,10 @@ ColumnLayout {
             return isFinite(date.getTime()) && Qt.formatDateTime(date, "yyyy-MM-dd HH:mm:ss") === input.trim() ? date.getTime() : NaN
         }
         contentItem: ColumnLayout {
-            Field { id: lastSeconds; objectName: "trendLastSeconds"; caption: "Последние секунды" }
+            Field { id: lastSeconds; objectName: "trendLastSeconds"; caption: qsTr("Последние секунды") }
             ActionButton {
                 objectName: "trendApplyLivePeriod"
-                text: "Следить за текущим временем"
+                text: qsTr("Следить за текущим временем")
                 onClicked: {
                     const seconds = Number(lastSeconds.text)
                     if (!Number.isInteger(seconds) || seconds < 1 || seconds > 31536000) { invalid.visible = true; return }
@@ -238,15 +238,15 @@ ColumnLayout {
                     rangeDialog.close()
                 }
             }
-            Field { id: fromField; objectName: "trendDateFrom"; caption: "Начало · ГГГГ-ММ-ДД ЧЧ:ММ:СС" }
-            Field { id: toField; objectName: "trendDateTo"; caption: "Конец · ГГГГ-ММ-ДД ЧЧ:ММ:СС" }
-            LabelValue { id: invalid; visible: false; mode: "error"; text: "Проверьте период и даты." }
+            Field { id: fromField; objectName: "trendDateFrom"; caption: qsTr("Начало · ГГГГ-ММ-ДД ЧЧ:ММ:СС") }
+            Field { id: toField; objectName: "trendDateTo"; caption: qsTr("Конец · ГГГГ-ММ-ДД ЧЧ:ММ:СС") }
+            LabelValue { id: invalid; visible: false; mode: "error"; text: qsTr("Проверьте период и даты.") }
             RowLayout {
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: rangeDialog.close() }
+                ActionButton { text: qsTr("Отмена"); onClicked: rangeDialog.close() }
                 ActionButton {
                     objectName: "trendApplyInterval"
-                    text: "Показать интервал"; highlighted: true
+                    text: qsTr("Показать интервал"); highlighted: true
                     onClicked: {
                         const from = rangeDialog.parse(fromField.text), to = rangeDialog.parse(toField.text)
                         if (!isFinite(from) || !isFinite(to) || to <= from) { invalid.visible = true; return }

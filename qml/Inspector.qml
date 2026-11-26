@@ -15,16 +15,16 @@ Rectangle {
     readonly property bool analogControl: ["setpoint", "slider", "knob"].includes(kind)
     readonly property bool binaryControl: ["switch", "valve"].includes(kind)
     readonly property bool writeControl: analogControl || binaryControl || ["selector", "command", "hitArea"].includes(kind)
-    readonly property var shapes: [{ id: "rectangle", label: "Прямоугольник" },
-        { id: "ellipse", label: "Эллипс" }, { id: "line", label: "Линия" }]
+    readonly property var shapes: [{ id: "rectangle", label: qsTr("Прямоугольник") },
+        { id: "ellipse", label: qsTr("Эллипс") }, { id: "line", label: qsTr("Линия") }]
     readonly property bool rangeWidget: analogControl || ["gauge", "tank", "dial", "column", "ring", "bargraph"].includes(kind)
-    readonly property var tagChoices: [{ id: "", name: "Выбрать тег" }].concat(api.editorTags.filter(tag => {
+    readonly property var tagChoices: [{ id: "", name: qsTr("Выбрать тег") }].concat(api.editorTags.filter(tag => {
         const type = tag.address?.type
         if (binaryControl) return type === "bool"
         if (analogControl || kind === "selector") return type !== "bool" && type !== "text"
         return kind === "value" || type !== "text"
     }))
-    readonly property var feedbackChoices: [{ id: "", name: "По основному тегу" }].concat(api.editorTags.filter(tag => tag.address?.type === "bool"))
+    readonly property var feedbackChoices: [{ id: "", name: qsTr("По основному тегу") }].concat(api.editorTags.filter(tag => tag.address?.type === "bool"))
     signal applied()
     color: "#ffffff"
     border.color: "#d7e0e8"
@@ -87,12 +87,12 @@ Rectangle {
             width: parent.width
             spacing: 10
             LabelValue {
-                text: panel.api.selectedIds.length > 1 ? "Выбрано элементов: " + panel.api.selectedIds.length : "Свойства элемента"
+                text: panel.api.selectedIds.length > 1 ? qsTr("Выбрано элементов: ") + panel.api.selectedIds.length : qsTr("Свойства элемента")
                 mode: "strong"; font.pixelSize: 15; Layout.fillWidth: true
             }
             Label {
                 visible: panel.kind === ""
-                text: "Выберите элемент на экране."
+                text: qsTr("Выберите элемент на экране.")
                 color: "#5d6d80"; wrapMode: Text.WordWrap; Layout.fillWidth: true
             }
             ColumnLayout {
@@ -102,14 +102,14 @@ Rectangle {
                     objectName: "faceplateCreate"
                     visible: panel.canCreateFaceplate
                     Layout.fillWidth: true
-                    text: "Создать тип из выбранных…"
+                    text: qsTr("Создать тип из выбранных…")
                     onClicked: faceplateCreateDialog.edit("", "")
                 }
-                Field { id: titleField; objectName: "widgetTitle"; caption: "Подпись"; onAccepted: panel.apply() }
+                Field { id: titleField; objectName: "widgetTitle"; caption: qsTr("Подпись"); onAccepted: panel.apply() }
                 CheckBox {
                     id: visibleByDefault
                     visible: panel.api.compositeDepth > 0
-                    text: "Виден без условия"
+                    text: qsTr("Виден без условия")
                     onToggled: panel.api.configureWidget({ visible: checked })
                 }
                 ComboBox {
@@ -124,48 +124,48 @@ Rectangle {
                     visible: !!panel.faceplateType
                     Layout.fillWidth: true
                     mode: "muted"
-                    text: panel.faceplateType ? "Тип · " + panel.faceplateType.name : ""
+                    text: panel.faceplateType ? qsTr("Тип · ") + panel.faceplateType.name : ""
                 }
                 ActionButton {
                     objectName: "faceplateBindings"
                     visible: !!panel.faceplateType
                     Layout.fillWidth: true
-                    text: "Привязки тегов…"
+                    text: qsTr("Привязки тегов…")
                     onClicked: faceplateBindings.edit(panel.item, panel.faceplateType)
                 }
                 ActionButton {
                     objectName: "faceplateInstanceProperties"
                     visible: !!panel.faceplateType
                     Layout.fillWidth: true
-                    text: "Свойства экземпляра…"
+                    text: qsTr("Свойства экземпляра…")
                     onClicked: faceplateProperties.edit(panel.item, panel.faceplateType)
                 }
                 ActionButton {
                     objectName: "faceplateOpenType"
                     visible: !!panel.faceplateType
                     Layout.fillWidth: true
-                    text: "Открыть тип"
+                    text: qsTr("Открыть тип")
                     onClicked: panel.api.enterComposite(panel.item.id)
                 }
                 ActionButton {
                     objectName: "faceplateChangeType"
                     visible: !!panel.faceplateType
                     Layout.fillWidth: true
-                    text: "Сменить тип…"
+                    text: qsTr("Сменить тип…")
                     onClicked: changeTypeDialog.edit(panel.item, panel.faceplateType)
                 }
                 ActionButton {
                     objectName: "faceplateCopyType"
                     visible: !!panel.faceplateType
                     Layout.fillWidth: true
-                    text: "Создать копию типа…"
+                    text: qsTr("Создать копию типа…")
                     onClicked: faceplateCreateDialog.edit(panel.item.id,
                         panel.api.suggestFaceplateCopyName(panel.faceplateType.id))
                 }
                 LabelValue {
                     visible: tags.visible
-                    text: panel.kind === "command" ? "Тег команды" :
-                        panel.writeControl ? "Тег показания" : "Привязка к тегу"
+                    text: panel.kind === "command" ? qsTr("Тег команды") :
+                        panel.writeControl ? qsTr("Тег показания") : qsTr("Привязка к тегу")
                     mode: "muted"
                 }
                 ComboBox {
@@ -177,7 +177,7 @@ Rectangle {
                     model: panel.tagChoices
                     textRole: "name"; valueRole: "id"
                 }
-                LabelValue { visible: panel.binaryControl; text: "Обратная связь"; mode: "muted" }
+                LabelValue { visible: panel.binaryControl; text: qsTr("Обратная связь"); mode: "muted" }
                 ComboBox {
                     id: feedback
                     visible: panel.binaryControl; Layout.fillWidth: true
@@ -187,79 +187,79 @@ Rectangle {
                 ActionButton {
                     objectName: "editSelectorPositions"
                     visible: panel.kind === "selector"; Layout.fillWidth: true
-                    text: "Положения и значения…"
+                    text: qsTr("Положения и значения…")
                     onClicked: selectorDialog.edit(panel.item.positions)
                 }
-                LabelValue { visible: direction.visible; text: "Направление трубы"; mode: "muted" }
+                LabelValue { visible: direction.visible; text: qsTr("Направление трубы"); mode: "muted" }
                 ComboBox {
                     id: direction
                     visible: panel.kind === "pipe" || (panel.kind === "shape" && shapeType.currentValue === "line")
                     Layout.fillWidth: true
-                    model: ["Горизонтальное", "Вертикальное"]
+                    model: [qsTr("Горизонтальное"), qsTr("Вертикальное")]
                 }
                 ActionButton {
                     objectName: "editTrend"
                     visible: panel.kind === "trend"
                     Layout.fillWidth: true
-                    text: "Ряды, шкалы и период…"
+                    text: qsTr("Ряды, шкалы и период…")
                     onClicked: trendDialog.edit(panel.item)
                 }
-                LabelValue { visible: screens.visible; text: "Экран назначения"; mode: "muted" }
+                LabelValue { visible: screens.visible; text: qsTr("Экран назначения"); mode: "muted" }
                 ComboBox {
                     id: screens
                     Layout.fillWidth: true
                     visible: panel.kind === "link"
-                    model: [{ id: "", name: "Выбрать экран" }].concat(panel.api.screens)
+                    model: [{ id: "", name: qsTr("Выбрать экран") }].concat(panel.api.screens)
                     textRole: "name"; valueRole: "id"
                 }
                 RowLayout {
                     visible: panel.rangeWidget
-                    Field { id: minField; caption: "Минимум" }
-                    Field { id: maxField; caption: "Максимум" }
+                    Field { id: minField; caption: qsTr("Минимум") }
+                    Field { id: maxField; caption: qsTr("Максимум") }
                 }
                 RowLayout {
                     visible: panel.industrial || panel.analogControl
-                    Field { id: precisionField; caption: "Знаков после запятой"; visible: panel.kind !== "signal" }
-                    Field { id: accentField; caption: "Цвет · #RRGGBB"; visible: panel.industrial }
+                    Field { id: precisionField; caption: qsTr("Знаков после запятой"); visible: panel.kind !== "signal" }
+                    Field { id: accentField; caption: qsTr("Цвет · #RRGGBB"); visible: panel.industrial }
                 }
-                Field { id: stepField; visible: panel.analogControl; caption: "Шаг изменения"; placeholderText: "Авто" }
+                Field { id: stepField; visible: panel.analogControl; caption: qsTr("Шаг изменения"); placeholderText: qsTr("Авто") }
                 Field {
                     id: commandField
                     visible: panel.kind === "command" || panel.kind === "hitArea"
-                    caption: panel.kind === "hitArea" ? "Значение зоны" : "Значение для записи"
+                    caption: panel.kind === "hitArea" ? qsTr("Значение зоны") : qsTr("Значение для записи")
                 }
                 ActionButton {
                     objectName: "widgetActions"
                     visible: panel.writeControl
                     Layout.fillWidth: true
-                    text: "События и действия…" + (panel.item.actions?.length ? " (" + panel.item.actions.length + ")" : "")
+                    text: qsTr("События и действия…") + (panel.item.actions?.length ? " (" + panel.item.actions.length + ")" : "")
                     onClicked: actionsDialog.edit(panel.item)
                 }
                 ActionButton {
                     objectName: "chooseWidgetImage"
                     visible: panel.kind === "image"
-                    text: "Выбрать изображение…"
+                    text: qsTr("Выбрать изображение…")
                     Layout.fillWidth: true
                     onClicked: imagePicker.open()
                 }
                 ActionButton {
                     objectName: "editAppearance"
-                    text: panel.api.compositeDepth ? "Оформление и условия…" : "Цвета и пороги…"
+                    text: panel.api.compositeDepth ? qsTr("Оформление и условия…") : qsTr("Цвета и пороги…")
                     Layout.fillWidth: true
                     onClicked: appearanceDialog.start(panel.item)
                 }
                 ActionButton {
                     objectName: "editLayerAnimation"
                     visible: panel.api.compositeDepth > 0 && panel.kind !== "hitArea"
-                    text: panel.item.animation?.kind === "rotate" ? "Анимация · вращение…" :
-                        panel.item.animation?.kind === "blink" ? "Анимация · мигание…" : "Анимация слоя…"
+                    text: panel.item.animation?.kind === "rotate" ? qsTr("Анимация · вращение…") :
+                        panel.item.animation?.kind === "blink" ? qsTr("Анимация · мигание…") : qsTr("Анимация слоя…")
                     Layout.fillWidth: true
                     onClicked: animationDialog.edit(panel.item)
                 }
                 ActionButton {
                     objectName: "applyWidget"
                     Layout.fillWidth: true
-                    text: "Применить свойства"
+                    text: qsTr("Применить свойства")
                     highlighted: true
                     onClicked: panel.apply()
                 }
@@ -269,42 +269,42 @@ Rectangle {
                     Field { id: yField; objectName: "widgetY"; caption: "Y" }
                 }
                 RowLayout {
-                    Field { id: wField; caption: "Ширина" }
-                    Field { id: hField; caption: "Высота" }
+                    Field { id: wField; caption: qsTr("Ширина") }
+                    Field { id: hField; caption: qsTr("Высота") }
                 }
                 ActionButton {
                     objectName: "widgetApplyPosition"
-                    text: "Применить положение"; Layout.fillWidth: true
+                    text: qsTr("Применить положение"); Layout.fillWidth: true
                     enabled: !panel.item.locked
                     onClicked: panel.api.moveWidget(panel.api.selectedId, Number(xField.text), Number(yField.text),
                                                      Number(wField.text), Number(hField.text))
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    ActionButton { objectName: "widgetSendBack"; text: "На задний план"; Layout.fillWidth: true; onClicked: panel.api.layerWidget(false) }
-                    ActionButton { objectName: "widgetBringFront"; text: "Вперёд"; onClicked: panel.api.layerWidget(true) }
+                    ActionButton { objectName: "widgetSendBack"; text: qsTr("На задний план"); Layout.fillWidth: true; onClicked: panel.api.layerWidget(false) }
+                    ActionButton { objectName: "widgetBringFront"; text: qsTr("Вперёд"); onClicked: panel.api.layerWidget(true) }
                 }
                 RowLayout {
                     Layout.fillWidth: true
-                    ActionButton { objectName: "widgetDuplicate"; text: "Копировать"; Layout.fillWidth: true; onClicked: panel.api.duplicateWidget() }
-                    ActionButton { objectName: "widgetRemove"; text: "Удалить"; onClicked: panel.api.removeWidget() }
+                    ActionButton { objectName: "widgetDuplicate"; text: qsTr("Копировать"); Layout.fillWidth: true; onClicked: panel.api.duplicateWidget() }
+                    ActionButton { objectName: "widgetRemove"; text: qsTr("Удалить"); onClicked: panel.api.removeWidget() }
                 }
                 RowLayout {
                     visible: panel.api.selectedIds.length > 1
                     Layout.fillWidth: true
-                    ActionButton { objectName: "widgetAlignLeft"; text: "По левому краю"; Layout.fillWidth: true; onClicked: panel.api.alignWidgets(false) }
-                    ActionButton { objectName: "widgetAlignTop"; text: "По верху"; Layout.fillWidth: true; onClicked: panel.api.alignWidgets(true) }
+                    ActionButton { objectName: "widgetAlignLeft"; text: qsTr("По левому краю"); Layout.fillWidth: true; onClicked: panel.api.alignWidgets(false) }
+                    ActionButton { objectName: "widgetAlignTop"; text: qsTr("По верху"); Layout.fillWidth: true; onClicked: panel.api.alignWidgets(true) }
                 }
                 ActionButton {
                     objectName: "groupWidgets"
                     visible: panel.api.selectedIds.length > 1 || !!panel.item.group
-                    text: panel.item.group ? "Разгруппировать" : "Сгруппировать"
+                    text: panel.item.group ? qsTr("Разгруппировать") : qsTr("Сгруппировать")
                     Layout.fillWidth: true
                     onClicked: panel.api.groupWidgets(!panel.item.group)
                 }
                 ActionButton {
                     objectName: "createTemplate"
-                    text: "Сохранить как шаблон…"
+                    text: qsTr("Сохранить как шаблон…")
                     Layout.fillWidth: true
                     onClicked: { templateName.clear(); templateDialog.open(); templateName.forceActiveFocus() }
                 }
@@ -314,8 +314,8 @@ Rectangle {
     FileDialog {
         id: imagePicker
         objectName: "widgetImagePicker"
-        title: "Выбрать изображение"
-        nameFilters: ["Изображения (*.png *.jpg *.jpeg *.bmp *.svg)"]
+        title: qsTr("Выбрать изображение")
+        nameFilters: [qsTr("Изображения (*.png *.jpg *.jpeg *.bmp *.svg)")]
         onAccepted: panel.api.setImage(selectedFile)
     }
     TrendDialog { id: trendDialog; api: panel.api }
@@ -327,7 +327,7 @@ Rectangle {
     FaceplateInstancePropertiesDialog { id: faceplateProperties; api: panel.api }
     Dialog {
         id: changeTypeDialog
-        title: "Сменить тип фейсплейса"
+        title: qsTr("Сменить тип фейсплейса")
         parent: Overlay.overlay
         anchors.centerIn: parent
         modal: true
@@ -371,14 +371,14 @@ Rectangle {
         }
         contentItem: ColumnLayout {
             spacing: 10
-            LabelValue { text: "Текущий тип · " + changeTypeDialog.sourceName; Layout.fillWidth: true }
+            LabelValue { text: qsTr("Текущий тип · ") + changeTypeDialog.sourceName; Layout.fillWidth: true }
             ComboBox {
                 id: typeTarget
                 objectName: "faceplateChangeTarget"
-                Accessible.name: "Новый тип фейсплейса"
+                Accessible.name: qsTr("Новый тип фейсплейса")
                 visible: changeTypeDialog.alternatives.length > 0
                 Layout.fillWidth: true
-                model: [{ id: "", name: "Выберите тип" }].concat(changeTypeDialog.alternatives)
+                model: [{ id: "", name: qsTr("Выберите тип") }].concat(changeTypeDialog.alternatives)
                 textRole: "name"
                 valueRole: "id"
                 onCurrentValueChanged: changeTypeDialog.refreshMapping()
@@ -386,7 +386,7 @@ Rectangle {
             FaceplateFieldMapping {
                 id: changeMapping
                 choicePrefix: "faceplateChangeMap_"
-                destinationHeading: "Поле нового типа"
+                destinationHeading: qsTr("Поле нового типа")
                 Layout.fillWidth: true
                 onEdited: changeTypeDialog.errorText = ""
             }
@@ -397,16 +397,16 @@ Rectangle {
                 wrapMode: Text.Wrap
                 textFormat: Text.PlainText
                 color: changeTypeDialog.alternatives.length ? "#873831" : "#506479"
-                text: !changeTypeDialog.alternatives.length ? "Сначала создайте копию в списке «Фейсплейсы»." :
+                text: !changeTypeDialog.alternatives.length ? qsTr("Сначала создайте копию в списке «Фейсплейсы».") :
                     changeTypeDialog.errorText || changeMapping.problem
             }
             RowLayout {
                 Layout.fillWidth: true
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: changeTypeDialog.close() }
+                ActionButton { text: qsTr("Отмена"); onClicked: changeTypeDialog.close() }
                 ActionButton {
                     objectName: "faceplateChangeApply"
-                    text: "Сменить тип"
+                    text: qsTr("Сменить тип")
                     enabled: changeTypeDialog.canApply
                     highlighted: true
                     onClicked: changeTypeDialog.applyChange()
@@ -423,7 +423,7 @@ Rectangle {
         modal: true
         focus: true
         property string copyInstanceId: ""
-        title: copyInstanceId ? "Создать копию типа" : "Новый тип составного виджета"
+        title: copyInstanceId ? qsTr("Создать копию типа") : qsTr("Новый тип составного виджета")
         onOpened: {
             faceplateName.forceActiveFocus()
             if (copyInstanceId) faceplateName.selectAll()
@@ -444,7 +444,7 @@ Rectangle {
             TextField {
                 id: faceplateName
                 objectName: faceplateCreateDialog.copyInstanceId ? "faceplateCopyName" : "faceplateName"
-                placeholderText: "Название типа"
+                placeholderText: qsTr("Название типа")
                 Accessible.name: placeholderText
                 Layout.fillWidth: true
                 onAccepted: if (text.trim()) faceplateCreateDialog.save()
@@ -454,12 +454,12 @@ Rectangle {
                 Item { Layout.fillWidth: true }
                 ActionButton {
                     objectName: "faceplateNameCancel"
-                    text: "Отмена"
+                    text: qsTr("Отмена")
                     onClicked: faceplateCreateDialog.close()
                 }
                 ActionButton {
                     objectName: faceplateCreateDialog.copyInstanceId ? "faceplateCopyApply" : "faceplateCreateApply"
-                    text: faceplateCreateDialog.copyInstanceId ? "Создать копию" : "Создать"
+                    text: faceplateCreateDialog.copyInstanceId ? qsTr("Создать копию") : qsTr("Создать")
                     enabled: faceplateName.text.trim() !== ""
                     highlighted: true
                     onClicked: faceplateCreateDialog.save()
@@ -473,21 +473,21 @@ Rectangle {
         anchors.centerIn: parent
         width: 400
         modal: true
-        title: "Новый шаблон элементов"
+        title: qsTr("Новый шаблон элементов")
         function save() { if (panel.api.saveTemplate(templateName.text)) close() }
         contentItem: ColumnLayout {
             TextField {
                 id: templateName
                 objectName: "templateName"
-                placeholderText: "Название шаблона"
+                placeholderText: qsTr("Название шаблона")
                 Layout.fillWidth: true
                 onAccepted: templateDialog.save()
             }
             RowLayout {
                 Layout.fillWidth: true
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: templateDialog.close() }
-                ActionButton { objectName: "templateSave"; text: "Сохранить"; highlighted: true; onClicked: templateDialog.save() }
+                ActionButton { text: qsTr("Отмена"); onClicked: templateDialog.close() }
+                ActionButton { objectName: "templateSave"; text: qsTr("Сохранить"); highlighted: true; onClicked: templateDialog.save() }
             }
         }
     }

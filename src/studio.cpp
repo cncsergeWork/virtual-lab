@@ -2,6 +2,7 @@
 
 #include "demo.h"
 #include "project.h"
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -388,14 +389,14 @@ FaceplateTypeChange remapFaceplateInstance(const QJsonObject &instance, const QJ
         }
         return transferred.size();
     };
-    change.tags = transfer("ports", "type", {"bindings"}, "тег «%1»");
-    change.properties = transfer("properties", "kind", {"overrides", "propertyBindings"}, "свойство «%1»");
+    change.tags = transfer("ports", "type", {"bindings"}, QCoreApplication::translate("Studio", "тег «%1»"));
+    change.properties = transfer("properties", "kind", {"overrides", "propertyBindings"}, QCoreApplication::translate("Studio", "свойство «%1»"));
     if (!unavailable.isEmpty()) {
         constexpr qsizetype shown = 5;
         auto list = unavailable.mid(0, shown).join(", ");
         if (unavailable.size() > shown)
-            list += QString(" и ещё %1").arg(unavailable.size() - shown);
-        change.error = QString("В выбранном типе нет совместимых полей: %1.").arg(list);
+            list += QCoreApplication::translate("Studio", " и ещё %1").arg(unavailable.size() - shown);
+        change.error = QCoreApplication::translate("Studio", "В выбранном типе нет совместимых полей: %1.").arg(list);
     }
     return change;
 }
@@ -410,7 +411,7 @@ FaceplateTypeChange prepareFaceplateTypeChange(const QJsonObject &project, const
     const auto target = Project::find(project, "faceplates", typeId);
     if (instance.value("kind") != "faceplate" || source.isEmpty() || target.isEmpty() || sourceId == typeId) {
         FaceplateTypeChange change;
-        change.error = "Выберите другой тип для экземпляра фейсплейса на экране.";
+        change.error = QCoreApplication::translate("Studio", "Выберите другой тип для экземпляра фейсплейса на экране.");
         return change;
     }
     FaceplateFieldUse used;
@@ -544,16 +545,16 @@ void Studio::newProject(bool demo)
 bool Studio::open(const QUrl &url)
 {
     if (!url.isLocalFile())
-        return fail("Выберите локальный файл проекта.");
+        return fail(QCoreApplication::translate("Studio", "Выберите локальный файл проекта."));
     QJsonObject next;
     QString error;
     const auto path = QFileInfo(url.toLocalFile()).absoluteFilePath();
     if (!Project::load(path, next, error))
-        return fail(QString("Не удалось открыть проект. %1").arg(error));
+        return fail(QCoreApplication::translate("Studio", "Не удалось открыть проект. %1").arg(error));
     stop();
     const auto archive = archivePath(path);
     if (!runtime_.openArchive(QFileInfo::exists(archive) ? archive : QString{}, next.value("id").toString(), error))
-        return fail(QString("Не удалось открыть архив. %1").arg(error));
+        return fail(QCoreApplication::translate("Studio", "Не удалось открыть архив. %1").arg(error));
     replaceProject(next, path);
     return true;
 }
@@ -561,14 +562,14 @@ bool Studio::open(const QUrl &url)
 bool Studio::save(const QUrl &url)
 {
     if (!url.isEmpty() && !url.isLocalFile())
-        return fail("Выберите локальный файл проекта.");
+        return fail(QCoreApplication::translate("Studio", "Выберите локальный файл проекта."));
     auto path = url.isEmpty() ? path_ : QFileInfo(url.toLocalFile()).absoluteFilePath();
     if (path.isEmpty())
-        return fail("Выберите файл проекта.");
+        return fail(QCoreApplication::translate("Studio", "Выберите файл проекта."));
     if (!path.endsWith(".scada.json", Qt::CaseInsensitive))
         path += ".scada.json";
     if (running() && path != path_)
-        return fail("Остановите опрос перед сохранением проекта в новый файл.");
+        return fail(QCoreApplication::translate("Studio", "Остановите опрос перед сохранением проекта в новый файл."));
     auto next = project_;
     QStringList copiedImages;
     const bool fork = !path_.isEmpty() && path != path_;
@@ -601,14 +602,14 @@ bool Studio::save(const QUrl &url)
                 }
             }
             if (!images.isEmpty() && !targetDir.mkpath("images"))
-                return fail("Не удалось создать папку изображений.");
+                return fail(QCoreApplication::translate("Studio", "Не удалось создать папку изображений."));
             for (const auto &image : images) {
                 const auto destination = targetDir.filePath(image);
                 if (QFile::exists(destination))
                     continue;
                 if (!QFile::copy(sourceDir.filePath(image), destination)) {
                     removeFiles(copiedImages);
-                    return fail(QString("Не удалось скопировать %1.").arg(image));
+                    return fail(QCoreApplication::translate("Studio", "Не удалось скопировать %1.").arg(image));
                 }
                 copiedImages.append(destination);
             }
@@ -617,14 +618,14 @@ bool Studio::save(const QUrl &url)
     QString error;
     if (!Project::save(path, next, error)) {
         removeFiles(copiedImages);
-        return fail(QString("Не удалось сохранить проект. %1").arg(error));
+        return fail(QCoreApplication::translate("Studio", "Не удалось сохранить проект. %1").arg(error));
     }
     if (fork) {
         undo_.clear();
         redo_.clear();
         const auto archive = archivePath(path);
         if (!runtime_.openArchive(QFileInfo::exists(archive) ? archive : QString{}, next.value("id").toString(), error))
-            fail(QString("Проект сохранён. Архив недоступен. %1").arg(error));
+            fail(QCoreApplication::translate("Studio", "Проект сохранён. Архив недоступен. %1").arg(error));
     }
     project_ = saved_ = next;
     path_ = path;
@@ -633,7 +634,7 @@ bool Studio::save(const QUrl &url)
     emit projectChanged();
     emit selectionChanged();
     emit canvasChanged();
-    emit notice("Проект сохранён.", false);
+    emit notice(QCoreApplication::translate("Studio", "Проект сохранён."), false);
     return true;
 }
 
@@ -643,18 +644,18 @@ bool Studio::start()
         return true;
     const auto entries = project_.value("sources").toArray();
     if (entries.isEmpty() || tags().isEmpty())
-        return fail("Добавьте хотя бы один источник и тег.");
+        return fail(QCoreApplication::translate("Studio", "Добавьте хотя бы один источник и тег."));
     if (path_.isEmpty()) {
         for (const auto &entry : entries) {
             if (!entry.toObject().value("settings").toObject().value("simulator").toBool())
-                return fail("Сохраните проект перед запуском опроса устройства.");
+                return fail(QCoreApplication::translate("Studio", "Сохраните проект перед запуском опроса устройства."));
         }
     } else {
         if (modified() && !save())
             return false;
         QString error;
         if (!runtime_.openArchive(archivePath(path_), project_.value("id").toString(), error))
-            return fail(QString("Не удалось открыть архив. %1").arg(error));
+            return fail(QCoreApplication::translate("Studio", "Не удалось открыть архив. %1").arg(error));
     }
     for (const auto &entry : entries) {
         const auto settings = entry.toObject().value("settings").toObject();
@@ -665,7 +666,7 @@ bool Studio::start()
         if (!server->listen(settings.value("port").toInt(), error)) {
             delete server;
             qDeleteAll(std::exchange(simulators_, {}));
-            return fail(QString("Не удалось запустить симулятор. %1").arg(error));
+            return fail(QCoreApplication::translate("Studio", "Не удалось запустить симулятор. %1").arg(error));
         }
         simulators_.append(server);
     }
@@ -699,7 +700,7 @@ void Studio::toggleSimulator()
 
 bool Studio::acquisitionEdit()
 {
-    return !running() || fail("Остановите опрос для изменения источников и тегов.");
+    return !running() || fail(QCoreApplication::translate("Studio", "Остановите опрос для изменения источников и тегов."));
 }
 
 bool Studio::commit(const QJsonObject &next)
@@ -776,7 +777,7 @@ bool Studio::changeEntity(const QString &key, QJsonObject object)
         object.insert("id", Project::id());
         entries.append(object);
     } else if (!replace(entries, object)) {
-        return fail("Эта запись уже удалена.");
+        return fail(QCoreApplication::translate("Studio", "Эта запись уже удалена."));
     }
     object.insert("name", object.value("name").toString().trimmed());
     replace(entries, object);
@@ -799,16 +800,16 @@ bool Studio::importEngineTags(const QString &sourceId, const QUrl &url)
     if (!acquisitionEdit()) return false;
     const auto source = Project::find(project_, "sources", sourceId);
     if (source.value("driver").toString() != "engine-json")
-        return fail("Выберите источник JSON-телеметрии.");
+        return fail(QCoreApplication::translate("Studio", "Выберите источник JSON-телеметрии."));
     if (!url.isEmpty() && !url.isLocalFile())
-        return fail("Выберите локальную таблицу тегов.");
+        return fail(QCoreApplication::translate("Studio", "Выберите локальную таблицу тегов."));
     QFile file(url.isEmpty() ? QString(":/engine-tags.json") : url.toLocalFile());
     if (!file.open(QIODevice::ReadOnly) || file.size() > 4 * 1024 * 1024)
-        return fail("Не удалось прочитать таблицу тегов JSON.");
+        return fail(QCoreApplication::translate("Studio", "Не удалось прочитать таблицу тегов JSON."));
     const auto catalog = QJsonDocument::fromJson(file.readAll()).object();
     const auto rows = catalog.value("tags").toArray();
     if (catalog.value("version").toInt() != 1 || rows.isEmpty())
-        return fail("Ожидается JSON версии 1 со списком tags.");
+        return fail(QCoreApplication::translate("Studio", "Ожидается JSON версии 1 со списком tags."));
     auto next = project_;
     auto tags = next.value("tags").toArray();
     QHash<QString, QJsonObject> owned;
@@ -823,18 +824,18 @@ bool Studio::importEngineTags(const QString &sourceId, const QUrl &url)
         const auto path = row.value("path").toString();
         const auto type = row.value("type").toString();
         if (name.isEmpty() || path.isEmpty())
-            return fail("Каждой строке таблицы нужны name, path и type.");
+            return fail(QCoreApplication::translate("Studio", "Каждой строке таблицы нужны name, path и type."));
         const auto interval = row.value("archiveMs");
         if ((!interval.isUndefined() && (!interval.isDouble() || interval.toDouble() != interval.toInt())) ||
             (!row.value("scale").isUndefined() && !row.value("scale").isDouble()) ||
             (!row.value("bias").isUndefined() && !row.value("bias").isDouble()))
-            return fail(QString("В строке «%1» проверьте период, масштаб и смещение.").arg(name));
+            return fail(QCoreApplication::translate("Studio", "В строке «%1» проверьте период, масштаб и смещение.").arg(name));
         const auto fullName = source.value("name").toString() + "." + name;
         const auto existing = owned.value(fullName.toCaseFolded());
         const QJsonObject address{{"path", path}, {"type", type}};
         if (!existing.isEmpty()) {
             if (existing.value("address").toObject() != address)
-                return fail(QString("Тег «%1» уже привязан к другому полю или типу.").arg(fullName));
+                return fail(QCoreApplication::translate("Studio", "Тег «%1» уже привязан к другому полю или типу.").arg(fullName));
             continue;
         }
         QJsonObject tag{{"id", Project::id()}, {"source", sourceId}, {"name", fullName}, {"address", address},
@@ -848,7 +849,7 @@ bool Studio::importEngineTags(const QString &sourceId, const QUrl &url)
     }
     next.insert("tags", tags);
     if (!commit(next)) return false;
-    emit notice(QString("Добавлено тегов из таблицы JSON: %1.").arg(added), false);
+    emit notice(QCoreApplication::translate("Studio", "Добавлено тегов из таблицы JSON: %1.").arg(added), false);
     return true;
 }
 
@@ -856,7 +857,7 @@ bool Studio::exportEngineTags(const QString &sourceId, const QUrl &url)
 {
     const auto source = Project::find(project_, "sources", sourceId);
     if (source.value("driver").toString() != "engine-json" || !url.isLocalFile())
-        return fail("Выберите источник JSON-телеметрии и локальный файл.");
+        return fail(QCoreApplication::translate("Studio", "Выберите источник JSON-телеметрии и локальный файл."));
     const auto prefix = source.value("name").toString() + ".";
     QJsonArray rows;
     for (const auto &entry : project_.value("tags").toArray()) {
@@ -871,14 +872,14 @@ bool Studio::exportEngineTags(const QString &sourceId, const QUrl &url)
         if (tag.contains("alarm")) row.insert("alarm", tag.value("alarm"));
         rows.append(row);
     }
-    if (rows.isEmpty()) return fail("У источника пока нет тегов.");
+    if (rows.isEmpty()) return fail(QCoreApplication::translate("Studio", "У источника пока нет тегов."));
     auto path = url.toLocalFile();
     if (!path.endsWith(".json", Qt::CaseInsensitive)) path += ".json";
     QSaveFile file(path);
     const auto data = QJsonDocument(QJsonObject{{"version",1}, {"tags",rows}}).toJson();
     if (!file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit())
         return fail(file.errorString());
-    emit notice("Таблица тегов сохранена.", false);
+    emit notice(QCoreApplication::translate("Studio", "Таблица тегов сохранена."), false);
     return true;
 }
 
@@ -888,7 +889,7 @@ bool Studio::removeSource(const QString &id)
         return false;
     for (const auto &value : project_.value("tags").toArray()) {
         if (value.toObject().value("source").toString() == id)
-            return fail("Перенесите или удалите теги этого источника.");
+            return fail(QCoreApplication::translate("Studio", "Перенесите или удалите теги этого источника."));
     }
     auto next = project_;
     auto entries = next.value("sources").toArray();
@@ -1006,7 +1007,7 @@ bool Studio::setScreenProperties(const QString &id, const QVariantMap &propertie
     auto screens = next.value("screens").toArray();
     auto screen = Project::find(next, "screens", id);
     if (screen.isEmpty())
-        return fail("Экран не найден.");
+        return fail(QCoreApplication::translate("Studio", "Экран не найден."));
     const auto previous = Project::screenSize(screen);
     for (const auto *field : {"name", "width", "height", "background", "backgroundFit", "backgroundImage", "gridStep", "operatorFit"}) {
         if (properties.contains(field))
@@ -1050,7 +1051,7 @@ void Studio::removeScreen()
     auto next = project_;
     auto screens = next.value("screens").toArray();
     if (screens.size() == 1) {
-        fail("В проекте должен остаться хотя бы один экран.");
+        fail(QCoreApplication::translate("Studio", "В проекте должен остаться хотя бы один экран."));
         return;
     }
     erase(screens, screenId_);
@@ -1102,15 +1103,15 @@ bool Studio::setItems(const QJsonArray &entries, QJsonObject next)
 
 void Studio::addWidget(const QString &kind, double x, double y)
 {
-    const QHash<QString, QString> names{{"value", "Значение"}, {"indicator", "Индикатор"}, {"trend", "Тренд"},
-                                       {"label", "Заголовок"}, {"gauge", "Шкала"}, {"command", "Команда"},
-                                       {"link", "Переход"}, {"image", "Изображение"}, {"tank", "Бак"}, {"pump", "Насос"},
-                                       {"dial", "Стрелочный прибор"}, {"column", "Термометр"}, {"ring", "Сегментная шкала"},
-                                       {"segments", "Цифровое табло"}, {"signal", "Сигнальная лампа"}, {"compass", "Компас"},
-                                       {"switch", "Тумблер"}, {"setpoint", "Ввод уставки"}, {"slider", "Ползунок"},
-                                       {"knob", "Регулятор"}, {"selector", "Выбор режима"}, {"valve", "Клапан"},
-                                       {"bargraph", "Линейный прибор"}, {"motor", "Двигатель"}, {"pipe", "Трубопровод"},
-                                       {"alarm", "Тревога"}, {"shape", "Фигура"}, {"hitArea", "Зона команды"}};
+    const QHash<QString, QString> names{{"value", QCoreApplication::translate("Studio", "Значение")}, {"indicator", QCoreApplication::translate("Studio", "Индикатор")}, {"trend", QCoreApplication::translate("Studio", "Тренд")},
+                                       {"label", QCoreApplication::translate("Studio", "Заголовок")}, {"gauge", QCoreApplication::translate("Studio", "Шкала")}, {"command", QCoreApplication::translate("Studio", "Команда")},
+                                       {"link", QCoreApplication::translate("Studio", "Переход")}, {"image", QCoreApplication::translate("Studio", "Изображение")}, {"tank", QCoreApplication::translate("Studio", "Бак")}, {"pump", QCoreApplication::translate("Studio", "Насос")},
+                                       {"dial", QCoreApplication::translate("Studio", "Стрелочный прибор")}, {"column", QCoreApplication::translate("Studio", "Термометр")}, {"ring", QCoreApplication::translate("Studio", "Сегментная шкала")},
+                                       {"segments", QCoreApplication::translate("Studio", "Цифровое табло")}, {"signal", QCoreApplication::translate("Studio", "Сигнальная лампа")}, {"compass", QCoreApplication::translate("Studio", "Компас")},
+                                       {"switch", QCoreApplication::translate("Studio", "Тумблер")}, {"setpoint", QCoreApplication::translate("Studio", "Ввод уставки")}, {"slider", QCoreApplication::translate("Studio", "Ползунок")},
+                                       {"knob", QCoreApplication::translate("Studio", "Регулятор")}, {"selector", QCoreApplication::translate("Studio", "Выбор режима")}, {"valve", QCoreApplication::translate("Studio", "Клапан")},
+                                       {"bargraph", QCoreApplication::translate("Studio", "Линейный прибор")}, {"motor", QCoreApplication::translate("Studio", "Двигатель")}, {"pipe", QCoreApplication::translate("Studio", "Трубопровод")},
+                                       {"alarm", QCoreApplication::translate("Studio", "Тревога")}, {"shape", QCoreApplication::translate("Studio", "Фигура")}, {"hitArea", QCoreApplication::translate("Studio", "Зона команды")}};
     const auto id = Project::id();
     const QSet<QString> wide{"segments", "bargraph", "setpoint", "slider", "selector", "alarm"};
     const int width = kind == "trend" ? 520 : wide.contains(kind) ? 310 : 224;
@@ -1297,9 +1298,9 @@ void Studio::groupWidgets(bool group)
 bool Studio::createFaceplate(const QString &name, int width, int height)
 {
     if (compositeDepth())
-        return fail("Завершите редактирование текущего типа перед созданием нового.");
+        return fail(QCoreApplication::translate("Studio", "Завершите редактирование текущего типа перед созданием нового."));
     if (width < 80 || width > 8192 || height < 52 || height > 8192)
-        return fail("Ширина типа должна быть от 80 до 8192 px, высота — от 52 до 8192 px.");
+        return fail(QCoreApplication::translate("Studio", "Ширина типа должна быть от 80 до 8192 px, высота — от 52 до 8192 px."));
     const auto selected = selectedItems();
     const auto typeId = Project::id();
     QJsonObject type{{"id", typeId}, {"name", name.trimmed()}, {"width", width}, {"height", height},
@@ -1310,7 +1311,7 @@ bool Studio::createFaceplate(const QString &name, int width, int height)
     if (!selected.isEmpty()) {
         for (const auto &entry : selected) {
             if (entry.toObject().value("kind").toString() == "faceplate")
-                return fail("Экземпляр составного виджета нельзя вложить в другой тип.");
+                return fail(QCoreApplication::translate("Studio", "Экземпляр составного виджета нельзя вложить в другой тип."));
         }
         const auto area = bounds(selected);
         const auto x = std::floor(area.left);
@@ -1378,7 +1379,7 @@ bool Studio::renameFaceplate(const QString &id, const QString &name)
 {
     auto type = Project::find(project_, "faceplates", id);
     if (type.isEmpty())
-        return fail("Тип фейсплейса не найден.");
+        return fail(QCoreApplication::translate("Studio", "Тип фейсплейса не найден."));
     type.insert("name", name.trimmed());
     auto next = project_;
     auto types = next.value("faceplates").toArray();
@@ -1394,9 +1395,9 @@ QString availableFaceplateCopyName(const QJsonObject &type, const QJsonArray &ty
     for (const auto &entry : types)
         names.insert(entry.toObject().value("name").toString().trimmed().toCaseFolded());
     const auto originalName = type.value("name").toString().trimmed();
-    auto name = originalName + " (копия)";
+    auto name = originalName + QCoreApplication::translate("Studio", " (копия)");
     for (int number = 2; names.contains(name.toCaseFolded()); ++number)
-        name = QString("%1 (копия %2)").arg(originalName).arg(number);
+        name = QCoreApplication::translate("Studio", "%1 (копия %2)").arg(originalName).arg(number);
     return name;
 }
 
@@ -1470,19 +1471,19 @@ bool writeFaceplateData(const QString &path, const QByteArray &data, QString &er
 QJsonObject readFaceplatePackage(const QUrl &url, QString &error)
 {
     if (!url.isLocalFile()) {
-        error = "Выберите локальный файл фейсплейса.";
+        error = QCoreApplication::translate("Studio", "Выберите локальный файл фейсплейса.");
         return {};
     }
     QFile file(url.toLocalFile());
     if (!file.open(QIODevice::ReadOnly)) {
-        error = QString("Не удалось открыть файл фейсплейса. %1").arg(file.errorString());
+        error = QCoreApplication::translate("Studio", "Не удалось открыть файл фейсплейса. %1").arg(file.errorString());
         return {};
     }
     const auto package = QJsonDocument::fromJson(file.readAll()).object();
     if (package.value("format") != "scada-faceplate" || package.value("version") != QJsonValue(1) ||
         !package.value("faceplate").isObject() || !package.value("images").isObject() ||
         !package.value("screens").isObject()) {
-        error = "Ожидается файл типа фейсплейса версии 1.";
+        error = QCoreApplication::translate("Studio", "Ожидается файл типа фейсплейса версии 1.");
         return {};
     }
 
@@ -1496,7 +1497,7 @@ QJsonObject readFaceplatePackage(const QUrl &url, QString &error)
         validation.insert("screens", screens);
     }
     if (const auto problem = Project::validate(validation); !problem.isEmpty()) {
-        error = QString("Не удалось прочитать тип фейсплейса. %1").arg(problem);
+        error = QCoreApplication::translate("Studio", "Не удалось прочитать тип фейсплейса. %1").arg(problem);
         return {};
     }
     return package;
@@ -1578,15 +1579,15 @@ QString buildFaceplateMapping(const QVariantList &rows, const QVariantMap &reque
             return choice.toMap().value("id").toString() == choiceId;
         });
         if (!compatible)
-            return QString("Выберите совместимое поле для «%1».").arg(name);
+            return QCoreApplication::translate("Studio", "Выберите совместимое поле для «%1».").arg(name);
         if (selected.contains(choiceId))
-            return QString("Поле для «%1» уже назначено. Выберите разные поля назначения.").arg(name);
+            return QCoreApplication::translate("Studio", "Поле для «%1» уже назначено. Выберите разные поля назначения.").arg(name);
         selected.insert(choiceId);
         mapping.insert(id, choiceId);
     }
     for (auto it = requested.cbegin(); it != requested.cend(); ++it) {
         if (!mapping.contains(it.key()))
-            return "Список используемых полей изменился. Откройте диалог заново.";
+            return QCoreApplication::translate("Studio", "Список используемых полей изменился. Откройте диалог заново.");
     }
     return {};
 }
@@ -1681,12 +1682,12 @@ QString Studio::duplicateFaceplate(const QString &id, const QString &name)
 {
     const auto type = Project::find(project_, "faceplates", id);
     if (type.isEmpty()) {
-        fail("Тип фейсплейса не найден.");
+        fail(QCoreApplication::translate("Studio", "Тип фейсплейса не найден."));
         return {};
     }
     const auto copyName = name.trimmed();
     if (copyName.isEmpty()) {
-        fail("Введите название копии типа.");
+        fail(QCoreApplication::translate("Studio", "Введите название копии типа."));
         return {};
     }
     auto next = project_;
@@ -1707,14 +1708,14 @@ bool Studio::duplicateFaceplateForInstance(const QString &instanceId, const QStr
 {
     const auto copyName = name.trimmed();
     if (copyName.isEmpty())
-        return fail("Введите название копии типа.");
+        return fail(QCoreApplication::translate("Studio", "Введите название копии типа."));
     auto canvas = activeCanvas();
     const auto instance = Project::find(canvas, "items", instanceId);
     if (instance.value("kind") != "faceplate")
-        return fail("Выберите экземпляр фейсплейса на экране.");
+        return fail(QCoreApplication::translate("Studio", "Выберите экземпляр фейсплейса на экране."));
     const auto type = Project::find(project_, "faceplates", instance.value("faceplate").toString());
     if (type.isEmpty())
-        return fail("Тип фейсплейса не найден.");
+        return fail(QCoreApplication::translate("Studio", "Тип фейсплейса не найден."));
 
     auto next = project_;
     auto types = next.value("faceplates").toArray();
@@ -1736,7 +1737,7 @@ bool Studio::duplicateFaceplateForInstance(const QString &instanceId, const QStr
     if (!commit(next))
         return false;
     enterComposite(instanceId);
-    emit notice(QString("Создан тип «%1». На него переключён выбранный фейсплейс.")
+    emit notice(QCoreApplication::translate("Studio", "Создан тип «%1». На него переключён выбранный фейсплейс.")
         .arg(copyName), false);
     return true;
 }
@@ -1744,10 +1745,10 @@ bool Studio::duplicateFaceplateForInstance(const QString &instanceId, const QStr
 bool Studio::exportFaceplate(const QString &id, const QUrl &url)
 {
     if (!url.isLocalFile())
-        return fail("Выберите локальный файл фейсплейса.");
+        return fail(QCoreApplication::translate("Studio", "Выберите локальный файл фейсплейса."));
     const auto type = Project::find(project_, "faceplates", id);
     if (type.isEmpty())
-        return fail("Тип фейсплейса не найден.");
+        return fail(QCoreApplication::translate("Studio", "Тип фейсплейса не найден."));
 
     QJsonObject images;
     QJsonObject screens;
@@ -1763,10 +1764,10 @@ bool Studio::exportFaceplate(const QString &id, const QUrl &url)
             continue;
         QFile image(Project::isDemoImage(relative) ? relative : imageUrl(relative).toLocalFile());
         if (!image.open(QIODevice::ReadOnly))
-            return fail(QString("Не удалось прочитать изображение «%1».").arg(item.value("title").toString()));
+            return fail(QCoreApplication::translate("Studio", "Не удалось прочитать изображение «%1».").arg(item.value("title").toString()));
         const auto content = image.readAll();
         if (content.isEmpty() || image.error() != QFileDevice::NoError)
-            return fail(QString("Изображение «%1» пустое или повреждено.").arg(item.value("title").toString()));
+            return fail(QCoreApplication::translate("Studio", "Изображение «%1» пустое или повреждено.").arg(item.value("title").toString()));
         images.insert(relative, QString::fromLatin1(content.toBase64()));
     }
     const QJsonObject package{{"format", "scada-faceplate"}, {"version", 1}, {"faceplate", type},
@@ -1776,8 +1777,8 @@ bool Studio::exportFaceplate(const QString &id, const QUrl &url)
         path += ".faceplate.json";
     QString error;
     if (!writeFaceplateData(path, QJsonDocument(package).toJson(QJsonDocument::Indented), error))
-        return fail(QString("Не удалось сохранить тип фейсплейса. %1").arg(error));
-    emit notice(QString("Тип «%1» сохранён в файл.").arg(type.value("name").toString()), false);
+        return fail(QCoreApplication::translate("Studio", "Не удалось сохранить тип фейсплейса. %1").arg(error));
+    emit notice(QCoreApplication::translate("Studio", "Тип «%1» сохранён в файл.").arg(type.value("name").toString()), false);
     return true;
 }
 
@@ -1823,14 +1824,14 @@ QString Studio::importFaceplate(const QUrl &url, const QString &requestedName, c
     const bool replacing = !replaceId.isEmpty();
     const auto previous = replacing ? Project::find(project_, "faceplates", replaceId) : QJsonObject{};
     if (replacing && previous.isEmpty())
-        return reject("Тип для замены не найден.");
+        return reject(QCoreApplication::translate("Studio", "Тип для замены не найден."));
     auto name = requestedName.trimmed();
     if (replacing) {
         name = previous.value("name").toString();
     } else if (requestedName.isNull()) {
         name = suggestedFaceplateImportName(source, types);
     } else if (name.isEmpty() || hasFaceplateName(types, name)) {
-        return reject("Введите свободное имя для нового типа фейсплейса.");
+        return reject(QCoreApplication::translate("Studio", "Введите свободное имя для нового типа фейсплейса."));
     }
     QHash<QString, QString> copiedFields;
     auto imported = makeFaceplateCopy(source, name, replacing ? &copiedFields : nullptr);
@@ -1851,7 +1852,7 @@ QString Studio::importFaceplate(const QUrl &url, const QString &requestedName, c
             if (change.error.isEmpty())
                 item = change.item;
             else
-                conflict = QString("Фейсплейс «%1». %2").arg(item.value("title").toString(), change.error);
+                conflict = QCoreApplication::translate("Studio", "Фейсплейс «%1». %2").arg(item.value("title").toString(), change.error);
         };
         editLayoutItems(next, "screens", update);
         editLayoutItems(next, "templates", update);
@@ -1890,7 +1891,7 @@ QString Studio::importFaceplate(const QUrl &url, const QString &requestedName, c
                 auto decoded = QByteArray::fromBase64Encoding(images.value(image).toString().toLatin1(),
                                                               QByteArray::AbortOnBase64DecodingErrors);
                 if (!decoded || decoded.decoded.isEmpty())
-                    return reject(QString("В файле отсутствует или повреждено изображение «%1».")
+                    return reject(QCoreApplication::translate("Studio", "В файле отсутствует или повреждено изображение «%1».")
                         .arg(item.value("title").toString()));
                 relative = "images/" + Project::id() + "." + QFileInfo(image).suffix();
                 relocatedImages.insert(image, relative);
@@ -1911,20 +1912,20 @@ QString Studio::importFaceplate(const QUrl &url, const QString &requestedName, c
     if (!imageData.isEmpty()) {
         const auto directory = imageDirectory();
         if (directory.isEmpty())
-            return reject("Не удалось подготовить временную папку для изображений.");
+            return reject(QCoreApplication::translate("Studio", "Не удалось подготовить временную папку для изображений."));
         const QDir dir(directory);
         if (!dir.mkpath("images"))
-            return reject("Не удалось создать папку изображений.");
+            return reject(QCoreApplication::translate("Studio", "Не удалось создать папку изображений."));
         for (auto it = imageData.cbegin(); it != imageData.cend(); ++it) {
             const auto destination = dir.filePath(it.key());
             if (QFile::exists(destination)) {
                 removeFiles(written);
-                return reject("В папке проекта уже есть изображение с таким именем.");
+                return reject(QCoreApplication::translate("Studio", "В папке проекта уже есть изображение с таким именем."));
             }
             QString error;
             if (!writeFaceplateData(destination, it.value(), error)) {
                 removeFiles(written);
-                return reject(QString("Не удалось сохранить изображение фейсплейса. %1").arg(error));
+                return reject(QCoreApplication::translate("Studio", "Не удалось сохранить изображение фейсплейса. %1").arg(error));
             }
             written.append(destination);
         }
@@ -1933,10 +1934,10 @@ QString Studio::importFaceplate(const QUrl &url, const QString &requestedName, c
         removeFiles(written);
         return {};
     }
-    auto noticeText = replacing ? QString("Тип «%1» заменён. Настройки экземпляров сохранены.").arg(name)
-                                : QString("Тип «%1» импортирован.").arg(name);
+    auto noticeText = replacing ? QCoreApplication::translate("Studio", "Тип «%1» заменён. Настройки экземпляров сохранены.").arg(name)
+                                : QCoreApplication::translate("Studio", "Тип «%1» импортирован.").arg(name);
     if (unresolvedLinks)
-        noticeText += QString(" Переходов без подходящего экрана: %1. Укажите экран в их свойствах.").arg(unresolvedLinks);
+        noticeText += QCoreApplication::translate("Studio", " Переходов без подходящего экрана: %1. Укажите экран в их свойствах.").arg(unresolvedLinks);
     emit notice(noticeText, false);
     return imported.value("id").toString();
 }
@@ -1967,7 +1968,7 @@ bool Studio::changeFaceplateType(const QString &instanceId, const QString &typeI
 void Studio::insertFaceplate(const QString &id)
 {
     if (compositeDepth()) {
-        fail("Составные виджеты вставляются на экран.");
+        fail(QCoreApplication::translate("Studio", "Составные виджеты вставляются на экран."));
         return;
     }
     const auto type = Project::find(project_, "faceplates", id);
@@ -1991,7 +1992,7 @@ bool Studio::removeFaceplate(const QString &id)
     auto next = project_;
     auto types = next.value("faceplates").toArray();
     if (!erase(types, id))
-        return fail("Тип фейсплейса не найден.");
+        return fail(QCoreApplication::translate("Studio", "Тип фейсплейса не найден."));
     for (const auto *key : {"screens", "templates"}) {
         const bool screen = QLatin1StringView(key) == "screens";
         for (const auto &entry : project_.value(key).toArray()) {
@@ -1999,8 +2000,8 @@ bool Studio::removeFaceplate(const QString &id)
             for (const auto &item : layout.value("items").toArray()) {
                 if (item.toObject().value("faceplate").toString() == id) {
                     const auto name = layout.value("name").toString();
-                    return fail(screen ? QString("Тип используется на экране «%1». Сначала удалите его экземпляры.").arg(name)
-                                       : QString("Тип используется в шаблоне «%1». Сначала удалите этот шаблон.").arg(name));
+                    return fail(screen ? QCoreApplication::translate("Studio", "Тип используется на экране «%1». Сначала удалите его экземпляры.").arg(name)
+                                       : QCoreApplication::translate("Studio", "Тип используется в шаблоне «%1». Сначала удалите этот шаблон.").arg(name));
                 }
             }
         }
@@ -2055,7 +2056,7 @@ bool Studio::setFaceplatePorts(const QVariantList &ports)
 {
     auto type = activeFaceplate();
     if (type.isEmpty())
-        return fail("Откройте тип составного виджета.");
+        return fail(QCoreApplication::translate("Studio", "Откройте тип составного виджета."));
     QHash<QString, QJsonObject> removed;
     for (const auto &entry : type.value("ports").toArray()) {
         const auto port = entry.toObject();
@@ -2071,7 +2072,7 @@ bool Studio::setFaceplatePorts(const QVariantList &ports)
         } else {
             previous = removed.take(id);
             if (previous.isEmpty())
-                return fail("Порт не найден или указан повторно.");
+                return fail(QCoreApplication::translate("Studio", "Порт не найден или указан повторно."));
         }
         QJsonObject port{{"id", id}, {"name", row.value("name").toString().trimmed()},
                          {"type", row.value("type").toString()}};
@@ -2112,7 +2113,7 @@ bool Studio::setFaceplateProperties(const QVariantList &properties)
 {
     auto type = activeFaceplate();
     if (type.isEmpty())
-        return fail("Откройте тип составного виджета.");
+        return fail(QCoreApplication::translate("Studio", "Откройте тип составного виджета."));
 
     QHash<QString, QJsonObject> previousProperties;
     for (const auto &entry : type.value("properties").toArray()) {
@@ -2127,13 +2128,13 @@ bool Studio::setFaceplateProperties(const QVariantList &properties)
         const auto kind = row.value("kind");
         QJsonObject previous;
         if (!row.value("id").isUndefined() && !row.value("id").isString())
-            return fail("Неверный идентификатор свойства интерфейса.");
+            return fail(QCoreApplication::translate("Studio", "Неверный идентификатор свойства интерфейса."));
         if (id.isEmpty()) {
             id = Project::id();
         } else {
             previous = previousProperties.take(id);
             if (previous.isEmpty())
-                return fail("Свойство интерфейса не найдено или указано повторно.");
+                return fail(QCoreApplication::translate("Studio", "Свойство интерфейса не найдено или указано повторно."));
             if (previous.value("kind") != kind)
                 removed.insert(id);
         }
@@ -2162,12 +2163,12 @@ bool Studio::setFaceplateSize(int width, int height)
 {
     auto type = activeFaceplate();
     if (type.isEmpty())
-        return fail("Откройте тип составного виджета.");
+        return fail(QCoreApplication::translate("Studio", "Откройте тип составного виджета."));
     if (width < 80 || width > 8192 || height < 52 || height > 8192)
-        return fail("Ширина типа должна быть от 80 до 8192 px, высота — от 52 до 8192 px.");
+        return fail(QCoreApplication::translate("Studio", "Ширина типа должна быть от 80 до 8192 px, высота — от 52 до 8192 px."));
     const auto area = bounds(type.value("items").toArray());
     if (area.right > width || area.bottom > height)
-        return fail("Переместите элементы внутрь нового размера типа.");
+        return fail(QCoreApplication::translate("Studio", "Переместите элементы внутрь нового размера типа."));
     type.insert("width", width);
     type.insert("height", height);
     auto next = project_;
@@ -2265,7 +2266,7 @@ bool Studio::saveTemplate(const QString &name)
         entries.append(item);
     }
     if (entries.isEmpty())
-        return fail("Выберите элементы для шаблона.");
+        return fail(QCoreApplication::translate("Studio", "Выберите элементы для шаблона."));
     auto next = project_;
     auto templates = next.value("templates").toArray();
     const auto canvas = Project::screenSize(activeCanvas());
@@ -2351,18 +2352,18 @@ QString Studio::importImage(const QUrl &url)
     const auto ext = file.suffix().toLower();
     const QSet<QString> supported{"png", "jpg", "jpeg", "bmp", "svg"};
     if (!url.isLocalFile() || !file.isFile() || !supported.contains(ext)) {
-        fail("Выберите PNG, JPEG, BMP или SVG.");
+        fail(QCoreApplication::translate("Studio", "Выберите PNG, JPEG, BMP или SVG."));
         return {};
     }
     const auto directory = imageDirectory();
     if (directory.isEmpty()) {
-        fail("Не удалось подготовить временную папку для изображений.");
+        fail(QCoreApplication::translate("Studio", "Не удалось подготовить временную папку для изображений."));
         return {};
     }
     const QDir dir(directory);
     const auto relative = "images/" + Project::id() + "." + ext;
     if (!dir.mkpath("images") || !QFile::copy(file.absoluteFilePath(), dir.filePath(relative))) {
-        fail("Не удалось скопировать изображение в проект.");
+        fail(QCoreApplication::translate("Studio", "Не удалось скопировать изображение в проект."));
         return {};
     }
     return relative;
@@ -2415,7 +2416,7 @@ void Studio::runWidgetActions(const QString &widgetId, const QVariantList &rows)
 void Studio::exportCsv(const QUrl &url, const QString &tag, qint64 from, qint64 to)
 {
     if (!url.isLocalFile()) {
-        fail("Выберите локальный файл для экспорта.");
+        fail(QCoreApplication::translate("Studio", "Выберите локальный файл для экспорта."));
         return;
     }
     auto path = url.toLocalFile();
@@ -2423,7 +2424,7 @@ void Studio::exportCsv(const QUrl &url, const QString &tag, qint64 from, qint64 
         path += ".csv";
     const auto error = runtime_.exportCsv(path, tag, from, to);
     if (error.isEmpty())
-        emit notice("Архив экспортирован.", false);
+        emit notice(QCoreApplication::translate("Studio", "Архив экспортирован."), false);
     else
         fail(error);
 }

@@ -8,12 +8,12 @@ Dialog {
     readonly property bool enabledEffect: !!effect.currentValue
     readonly property bool blink: effect.currentValue === "blink"
     readonly property bool interval: operator.currentValue === "between" || operator.currentValue === "outside"
-    readonly property var tags: [{ id: "", name: "Без привязки" }].concat(api.editorTags.filter(tag => tag.address?.type !== "text"))
+    readonly property var tags: [{ id: "", name: qsTr("Без привязки") }].concat(api.editorTags.filter(tag => tag.address?.type !== "text"))
     readonly property var operators: [
-        { id: "eq", name: "Равно" }, { id: "ne", name: "Не равно" },
-        { id: "gte", name: "Больше или равно" }, { id: "gt", name: "Больше" },
-        { id: "lte", name: "Меньше или равно" }, { id: "lt", name: "Меньше" },
-        { id: "between", name: "В диапазоне" }, { id: "outside", name: "Вне диапазона" }
+        { id: "eq", name: qsTr("Равно") }, { id: "ne", name: qsTr("Не равно") },
+        { id: "gte", name: qsTr("Больше или равно") }, { id: "gt", name: qsTr("Больше") },
+        { id: "lte", name: qsTr("Меньше или равно") }, { id: "lt", name: qsTr("Меньше") },
+        { id: "between", name: qsTr("В диапазоне") }, { id: "outside", name: qsTr("Вне диапазона") }
     ]
     readonly property real lower: number(threshold.text)
     readonly property real upper: number(maximum.text)
@@ -21,7 +21,7 @@ Dialog {
         (!interval || Number.isFinite(upper) && upper >= lower && upper <= 1e100)
 
     modal: true
-    title: "Анимация слоя"
+    title: qsTr("Анимация слоя")
     parent: Overlay.overlay
     anchors.centerIn: parent
     width: Math.min(470, parent ? parent.width - 24 : 470)
@@ -54,25 +54,25 @@ Dialog {
 
     contentItem: ColumnLayout {
         spacing: 8
-        LabelValue { text: "Эффект"; mode: "muted" }
+        LabelValue { text: qsTr("Эффект"); mode: "muted" }
         ComboBox {
             id: effect
             objectName: "layerAnimationKind"
             Layout.fillWidth: true
-            model: [{ id: "", name: "Нет" }, { id: "rotate", name: "Вращение" }, { id: "blink", name: "Мигание" }]
+            model: [{ id: "", name: qsTr("Нет") }, { id: "rotate", name: qsTr("Вращение") }, { id: "blink", name: qsTr("Мигание") }]
             textRole: "name"; valueRole: "id"
         }
         ColumnLayout {
             visible: form.enabledEffect
             Layout.fillWidth: true
-            LabelValue { text: "Тег включения"; mode: "muted" }
+            LabelValue { text: qsTr("Тег включения"); mode: "muted" }
             ComboBox {
                 id: trigger
                 objectName: "layerAnimationTag"
                 Layout.fillWidth: true
                 model: form.tags; textRole: "name"; valueRole: "id"
             }
-            LabelValue { text: "Условие"; mode: "muted" }
+            LabelValue { text: qsTr("Условие"); mode: "muted" }
             ComboBox {
                 id: operator
                 objectName: "layerAnimationOperator"
@@ -81,12 +81,12 @@ Dialog {
             }
             RowLayout {
                 Layout.fillWidth: true
-                Field { id: threshold; objectName: "layerAnimationLimit"; caption: form.interval ? "Нижняя граница" : "Порог" }
-                Field { id: maximum; visible: form.interval; caption: "Верхняя граница" }
+                Field { id: threshold; objectName: "layerAnimationLimit"; caption: form.interval ? qsTr("Нижняя граница") : qsTr("Порог") }
+                Field { id: maximum; visible: form.interval; caption: qsTr("Верхняя граница") }
             }
             RowLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Период цикла, мс"; Layout.fillWidth: true }
+                LabelValue { text: qsTr("Период цикла, мс"); Layout.fillWidth: true }
                 SpinBox {
                     id: period
                     objectName: "layerAnimationPeriod"
@@ -99,26 +99,26 @@ Dialog {
             RowLayout {
                 visible: !form.blink
                 Layout.fillWidth: true
-                LabelValue { text: "Направление"; Layout.fillWidth: true }
+                LabelValue { text: qsTr("Направление"); Layout.fillWidth: true }
                 ComboBox {
                     id: direction
-                    model: ["По часовой", "Против часовой"]
+                    model: [qsTr("По часовой"), qsTr("Против часовой")]
                 }
             }
             RowLayout {
                 visible: form.blink
                 Layout.fillWidth: true
-                LabelValue { text: "Непрозрачность в тусклой фазе, %"; Layout.fillWidth: true }
+                LabelValue { text: qsTr("Непрозрачность в тусклой фазе, %"); Layout.fillWidth: true }
                 SpinBox { id: dim; from: 0; to: 95; stepSize: 5; editable: true }
             }
         }
         RowLayout {
             Layout.fillWidth: true
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: form.close() }
+            ActionButton { text: qsTr("Отмена"); onClicked: form.close() }
             ActionButton {
                 objectName: "layerAnimationApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 highlighted: true
                 enabled: form.valid
                 onClicked: form.apply()

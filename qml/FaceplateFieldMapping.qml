@@ -13,16 +13,16 @@ ColumnLayout {
         const selected = new Set()
         for (const row of rows) {
             const id = selection[row.id]
-            if (!id) return "Выберите поле для «" + row.name + "»."
-            if (selected.has(id)) return "Выберите разные поля назначения."
+            if (!id) return qsTr("Выберите поле для «") + row.name + "»."
+            if (selected.has(id)) return qsTr("Выберите разные поля назначения.")
             selected.add(id)
         }
         return ""
     }
     readonly property var kindLabels: ({
-        number: "Числовой тег", bool: "Логический тег", text: "Текстовый тег",
-        title: "Подпись", background: "Цвет фона", value: "Цвет значения",
-        captionColor: "Цвет подписи", visible: "Видимость"
+        number: qsTr("Числовой тег"), bool: qsTr("Логический тег"), text: qsTr("Текстовый тег"),
+        title: qsTr("Подпись"), background: qsTr("Цвет фона"), value: qsTr("Цвет значения"),
+        captionColor: qsTr("Цвет подписи"), visible: qsTr("Видимость")
     })
     signal edited()
     spacing: 7
@@ -42,7 +42,7 @@ ColumnLayout {
     }
     RowLayout {
         Layout.fillWidth: true
-        LabelValue { text: "Используемое поле"; mode: "strong"; Layout.preferredWidth: 224 }
+        LabelValue { text: qsTr("Используемое поле"); mode: "strong"; Layout.preferredWidth: 224 }
         LabelValue { text: table.destinationHeading; mode: "strong"; Layout.fillWidth: true }
     }
     ListView {
@@ -78,10 +78,10 @@ ColumnLayout {
             }
             ComboBox {
                 objectName: table.choicePrefix + mappingRow.index
-                Accessible.name: table.destinationHeading + " для " + mappingRow.modelData.name
+                Accessible.name: table.destinationHeading + qsTr(" для ") + mappingRow.modelData.name
                 Layout.fillWidth: true
-                model: [{ id: "", name: mappingRow.modelData.choices.length ? "Выберите поле" :
-                    "Нет совместимых полей" }].concat(mappingRow.modelData.choices)
+                model: [{ id: "", name: mappingRow.modelData.choices.length ? qsTr("Выберите поле") :
+                    qsTr("Нет совместимых полей") }].concat(mappingRow.modelData.choices)
                 textRole: "name"
                 valueRole: "id"
                 currentIndex: mappingRow.modelData.choices.findIndex(choice =>

@@ -1,5 +1,6 @@
 #include "engine.h"
 
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QRegularExpression>
 #include <cmath>
@@ -22,21 +23,21 @@ QString Engine::validateSource(const QJsonObject &source)
     const auto timeout = settings.value("timeoutMs");
     if (!timeout.isDouble() || timeout.toDouble() != timeout.toInt()
         || timeout.toInt() < 500 || timeout.toInt() > 30000)
-        return "Тайм-аут телеметрии должен быть от 500 до 30000 мс.";
+        return QCoreApplication::translate("Engine", "Тайм-аут телеметрии должен быть от 500 до 30000 мс.");
     if (settings.value("allowWrite").toBool() || settings.value("simulator").toBool())
-        return "Источник JSON-телеметрии работает в режиме чтения.";
+        return QCoreApplication::translate("Engine", "Источник JSON-телеметрии работает в режиме чтения.");
     if (transport == "websocket") {
         const QUrl url(settings.value("url").toString(), QUrl::StrictMode);
         if (!url.isValid() || (url.scheme() != "ws" && url.scheme() != "wss")
             || url.host().isEmpty() || !url.userInfo().isEmpty() || url.hasFragment() || url.port() == 0)
-            return "Введите полный адрес ws:// или wss:// без учётных данных и фрагмента.";
+            return QCoreApplication::translate("Engine", "Введите полный адрес ws:// или wss:// без учётных данных и фрагмента.");
     } else if (transport == "serial") {
         static const QRegularExpression port("^(COM[1-9][0-9]{0,3}|/dev/[A-Za-z0-9._/-]+)$",
                                               QRegularExpression::CaseInsensitiveOption);
         if (!port.match(settings.value("portName").toString()).hasMatch())
-            return "Введите имя последовательного порта, например COM7.";
+            return QCoreApplication::translate("Engine", "Введите имя последовательного порта, например COM7.");
     } else {
-        return "Выберите WebSocket или USB COM.";
+        return QCoreApplication::translate("Engine", "Выберите WebSocket или USB COM.");
     }
     return {};
 }
@@ -46,20 +47,20 @@ QString Engine::validateTag(const QJsonObject &tag)
     const auto address = tag.value("address").toObject();
     const auto type = address.value("type").toString();
     if (!validPath(address.value("path").toString()))
-        return "Введите путь к JSON-полю, например values.rpm.";
+        return QCoreApplication::translate("Engine", "Введите путь к JSON-полю, например values.rpm.");
     if (type != "number" && type != "bool" && type != "text")
-        return "Выберите число, логическое значение или текст.";
+        return QCoreApplication::translate("Engine", "Выберите число, логическое значение или текст.");
     const auto scale = tag.value("scale");
     const auto bias = tag.value("bias");
     if (!scale.isDouble() || !bias.isDouble() || !std::isfinite(scale.toDouble())
         || scale.toDouble() == 0 || !std::isfinite(bias.toDouble()))
-        return "Проверьте масштаб и смещение.";
+        return QCoreApplication::translate("Engine", "Проверьте масштаб и смещение.");
     if (tag.value("writable").toBool())
-        return "Теги JSON-телеметрии предназначены для чтения.";
+        return QCoreApplication::translate("Engine", "Теги JSON-телеметрии предназначены для чтения.");
     if (type != "number" && (scale.toDouble() != 1 || bias.toDouble() != 0))
-        return "Для логических и текстовых полей используйте масштаб 1 и смещение 0.";
+        return QCoreApplication::translate("Engine", "Для логических и текстовых полей используйте масштаб 1 и смещение 0.");
     if (type == "text" && (tag.value("archiveMs").toInt() != 0 || !tag.value("alarm").isUndefined()))
-        return "Текстовое поле доступно в таблице и виджете значения.";
+        return QCoreApplication::translate("Engine", "Текстовое поле доступно в таблице и виджете значения.");
     return {};
 }
 
@@ -114,7 +115,7 @@ EngineSource::EngineSource(const QJsonObject &source, const QList<QJsonObject> &
     socket_.setMaxAllowedIncomingMessageSize(packetLimit);
     socket_.setMaxAllowedIncomingFrameSize(packetLimit);
     connect(&socket_, &QWebSocket::connected, this, &EngineSource::sendHello);
-    connect(&socket_, &QWebSocket::disconnected, this, [this] { disconnect("WebSocket закрыт."); });
+    connect(&socket_, &QWebSocket::disconnected, this, [this] { disconnect(QCoreApplication::translate("Engine", "WebSocket закрыт.")); });
     connect(&socket_, &QWebSocket::textMessageReceived, this, [this](const QString &text) { receive(text.toUtf8()); });
     connect(&socket_, &QWebSocket::errorOccurred, this, [this](auto) { disconnect(socket_.errorString()); });
     connect(&serial_, &QSerialPort::readyRead, this, [this] {
@@ -148,7 +149,7 @@ void EngineSource::stop()
 
 QString EngineSource::write(const QJsonObject &, double)
 {
-    return "Источник JSON-телеметрии работает в режиме чтения.";
+    return QCoreApplication::translate("Engine", "Источник JSON-телеметрии работает в режиме чтения.");
 }
 
 void EngineSource::tick()
@@ -156,14 +157,14 @@ void EngineSource::tick()
     const auto now = clock_.elapsed();
     if (opened_ >= 0) {
         if (lastPacket_ < 0 && now - opened_ >= 8000)
-            disconnect("После подключения не получена JSON-телеметрия.");
+            disconnect(QCoreApplication::translate("Engine", "После подключения не получена JSON-телеметрия."));
         else if (lastPacket_ >= 0 && now - lastPacket_ >= timeout_)
-            disconnect("Истёк тайм-аут JSON-телеметрии.");
+            disconnect(QCoreApplication::translate("Engine", "Истёк тайм-аут JSON-телеметрии."));
         return;
     }
     if (now < nextConnect_) return;
     opened_ = now;
-    emit statusChanged("connecting", "Ожидается идентификация источника JSON-телеметрии.");
+    emit statusChanged("connecting", QCoreApplication::translate("Engine", "Ожидается идентификация источника JSON-телеметрии."));
     if (port_.isEmpty()) {
         socket_.open(url_);
         return;
@@ -209,7 +210,7 @@ void EngineSource::receive(const QByteArray &raw)
     if (session.isEmpty() || session.size() > 100 || !std::isfinite(ts) || ts < 0) return;
     const bool wraparound = lastTs_ >= 4026531840.0 && ts < 268435456.0;
     if (session == session_ && ts <= lastTs_ && !wraparound) return;
-    if (!session_.isEmpty() && session != session_) stale("Началась новая сессия источника.");
+    if (!session_.isEmpty() && session != session_) stale(QCoreApplication::translate("Engine", "Началась новая сессия источника."));
     if (lastPacket_ < 0) emit statusChanged("connected", device_);
     lastPacket_ = clock_.elapsed();
     session_ = session;
@@ -218,7 +219,7 @@ void EngineSource::receive(const QByteArray &raw)
     for (const auto &tag : tags_) {
         const auto rawValue = Engine::field(packet, tag.path);
         if (rawValue.isNull() || rawValue.isUndefined()) {
-            emit sample(tag.id, {}, Quality::Stale, "Поле пока недоступно.");
+            emit sample(tag.id, {}, Quality::Stale, QCoreApplication::translate("Engine", "Поле пока недоступно."));
         } else if (tag.type == "text" && rawValue.isString()) {
             emit sample(tag.id, rawValue.toString(), Quality::Good, {});
         } else if (tag.type == "bool" && (rawValue.isBool() ||
@@ -228,7 +229,7 @@ void EngineSource::receive(const QByteArray &raw)
                    && std::isfinite(rawValue.toDouble() * tag.scale + tag.bias)) {
             emit sample(tag.id, rawValue.toDouble() * tag.scale + tag.bias, Quality::Good, {});
         } else {
-            emit sample(tag.id, {}, Quality::Error, "Тип значения JSON не совпадает с настройкой тега.");
+            emit sample(tag.id, {}, Quality::Error, QCoreApplication::translate("Engine", "Тип значения JSON не совпадает с настройкой тега."));
         }
     }
 }

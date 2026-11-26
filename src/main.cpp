@@ -1,3 +1,4 @@
+#include "interface_language.h"
 #include "studio.h"
 
 #include <QDir>
@@ -15,6 +16,7 @@
 
 int runUiFlow(QObject *root, Studio &studio);
 int runUiAudit(QObject *root, Studio &studio);
+int runUiLanguage(QObject *root, Studio &studio, InterfaceLanguage &language);
 #endif
 
 int main(int argc, char *argv[])
@@ -30,7 +32,8 @@ int main(int argc, char *argv[])
 #ifdef SCADA_UI_TEST
     std::optional<QTemporaryDir> testSettings;
     const bool audit = arguments.contains("--ui-audit");
-    if (audit || arguments.contains("--ui-test")) {
+    const bool languageTest = arguments.contains("--ui-language");
+    if (audit || languageTest || arguments.contains("--ui-test")) {
         testSettings.emplace();
         if (!testSettings->isValid())
             return 1;
@@ -50,18 +53,22 @@ int main(int argc, char *argv[])
     palette.setColor(QPalette::Highlight, QColor("#0b716a"));
     palette.setColor(QPalette::HighlightedText, Qt::white);
     app.setPalette(palette);
+    InterfaceLanguage language;
     Studio studio;
     QQmlApplicationEngine engine;
     int warnings = 0;
     QObject::connect(&engine, &QQmlEngine::warnings, &app, [&warnings](const auto &list) { warnings += list.size(); });
+    QObject::connect(&language, &InterfaceLanguage::changed, &engine, &QQmlEngine::retranslate);
+    engine.rootContext()->setContextProperty("interfaceLanguage", &language);
     engine.rootContext()->setContextProperty("studioApi", &studio);
     engine.load(QUrl("qrc:/qml/Main.qml"));
     if (engine.rootObjects().isEmpty())
         return 1;
 #ifdef SCADA_UI_TEST
     if (testSettings) {
-        const auto failed = audit ? runUiAudit(engine.rootObjects().first(), studio)
-                                  : runUiFlow(engine.rootObjects().first(), studio);
+        auto *root = engine.rootObjects().first();
+        const auto failed = languageTest ? runUiLanguage(root, studio, language)
+                                         : audit ? runUiAudit(root, studio) : runUiFlow(root, studio);
         return failed != 0 ? failed : warnings == 0 ? 0 : 3;
     }
 #endif

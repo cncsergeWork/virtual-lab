@@ -57,12 +57,12 @@ Item {
     function timeText(t) { return Qt.formatDateTime(new Date(t), "dd.MM.yyyy HH:mm:ss.zzz") }
     function displayValue(reading, units) {
         if (!reading || !reading.hasValue) {
-            if (reading?.quality === "stale") return "Устарело"
-            if (reading?.quality === "error") return "Ошибка"
+            if (reading?.quality === "stale") return qsTr("Устарело")
+            if (reading?.quality === "error") return qsTr("Ошибка")
             return "—"
         }
         const value = Number(reading.value)
-        const suffix = reading.quality === "stale" ? " · устарело" : reading.quality === "error" ? " · ошибка" : ""
+        const suffix = reading.quality === "stale" ? qsTr(" · устарело") : reading.quality === "error" ? qsTr(" · ошибка") : ""
         return (Math.abs(value) >= 10000000 ? value.toExponential(3) : Number(value.toPrecision(7)).toLocaleString(Qt.locale(), "g", 7))
             + (units ? " " + units : "") + suffix
     }
@@ -135,26 +135,26 @@ Item {
             color: "#ffffff"; radius: 8; border.color: "#d7e0e8"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 12; spacing: 7
-                LabelValue { text: "Каналы"; mode: "strong"; font.pixelSize: 17; Layout.fillWidth: true }
-                TextField { id: search; objectName: "archiveSearch"; Layout.fillWidth: true; placeholderText: "Найти тег или источник" }
+                LabelValue { text: qsTr("Каналы"); mode: "strong"; font.pixelSize: 17; Layout.fillWidth: true }
+                TextField { id: search; objectName: "archiveSearch"; Layout.fillWidth: true; placeholderText: qsTr("Найти тег или источник") }
                 RowLayout {
                     Layout.fillWidth: true
                     ActionButton {
                         objectName: "archiveAllChannels"
-                        text: "Добавить все"
+                        text: qsTr("Добавить все")
                         enabled: list.model.length > 0
                         Layout.fillWidth: true
                         onClicked: page.selected = page.selected.concat(list.model.filter(tag => !page.selected.includes(tag.id)).map(tag => tag.id))
                     }
                     ActionButton {
                         objectName: "archiveClearChannels"
-                        text: "Очистить"
+                        text: qsTr("Очистить")
                         enabled: page.selected.length > 0
                         onClicked: page.selected = []
                     }
                 }
                 LabelValue {
-                    text: page.cursor ? page.timeText(page.cursor) : "Наведите курсор на график"
+                    text: page.cursor ? page.timeText(page.cursor) : qsTr("Наведите курсор на график")
                     mode: page.cursor ? "strong" : "muted"; Layout.fillWidth: true
                 }
                 ListView {
@@ -189,19 +189,19 @@ Item {
                                 palette.windowText: page.colorFor(row.modelData.id)
                                 onToggled: page.toggle(row.modelData.id)
                                 ToolTip.visible: hovered && row.modelData.archiveMs === 0
-                                ToolTip.text: "Архивирование выключено. Сохранённые ранее записи доступны."
+                                ToolTip.text: qsTr("Архивирование выключено. Сохранённые ранее записи доступны.")
                             }
                             LabelValue {
-                                text: "Сейчас  " + page.displayValue(row.live, row.modelData.units)
+                                text: qsTr("Сейчас  ") + page.displayValue(row.live, row.modelData.units)
                                 mode: "muted"; Layout.fillWidth: true; Layout.leftMargin: 22; font.pixelSize: 11
                             }
                             LabelValue {
                                 objectName: "archiveCursorValue_" + row.modelData.id
                                 visible: row.shown && !!page.cursor
-                                text: "Курсор  " + page.displayValue(row.archived, row.modelData.units)
+                                text: qsTr("Курсор  ") + page.displayValue(row.archived, row.modelData.units)
                                 mode: "strong"; Layout.fillWidth: true; Layout.leftMargin: 22; font.pixelSize: 12
                                 ToolTip.visible: archivedHover.hovered && !!row.archived.time
-                                ToolTip.text: row.archived.time ? "Записано " + page.timeText(row.archived.time) : ""
+                                ToolTip.text: row.archived.time ? qsTr("Записано ") + page.timeText(row.archived.time) : ""
                                 HoverHandler { id: archivedHover }
                             }
                         }
@@ -219,25 +219,25 @@ Item {
                     Layout.fillWidth: true; spacing: 5
                     ActionButton {
                         objectName: "archiveLive"
-                        text: "До сейчас"; highlighted: page.follow
+                        text: qsTr("До сейчас"); highlighted: page.follow
                         onClicked: { page.follow = true; page.tickNow(); page.clearCursor() }
                     }
                     ComboBox {
                         objectName: "archivePeriod"
-                        model: [{ text: "10 сек", ms: 10000 }, { text: "1 мин", ms: 60000 }, { text: "5 мин", ms: 300000 },
-                                { text: "1 час", ms: 3600000 }, { text: "24 часа", ms: 86400000 }, { text: "7 дней", ms: 604800000 }]
+                        model: [{ text: qsTr("10 сек"), ms: 10000 }, { text: qsTr("1 мин"), ms: 60000 }, { text: qsTr("5 мин"), ms: 300000 },
+                                { text: qsTr("1 час"), ms: 3600000 }, { text: qsTr("24 часа"), ms: 86400000 }, { text: qsTr("7 дней"), ms: 604800000 }]
                         currentIndex: 1
                         textRole: "text"
                         valueRole: "ms"
                         onActivated: page.showPeriod(currentValue)
                     }
-                    ActionButton { objectName: "archiveFit"; text: "Весь архив"; enabled: page.tagIds.length > 0; onClicked: page.fitAll() }
-                    ActionButton { objectName: "archiveZoomIn"; text: "+"; onClicked: page.zoom(0.65, 0.5); ToolTip.visible: hovered; ToolTip.text: "Приблизить" }
-                    ActionButton { objectName: "archiveZoomOut"; text: "−"; onClicked: page.zoom(1.54, 0.5); ToolTip.visible: hovered; ToolTip.text: "Отдалить" }
-                    ActionButton { objectName: "archiveEarlier"; text: "‹"; onClicked: page.shift(-0.5); ToolTip.visible: hovered; ToolTip.text: "Раньше" }
-                    ActionButton { objectName: "archiveLater"; text: "›"; onClicked: page.shift(0.5); ToolTip.visible: hovered; ToolTip.text: "Позже" }
+                    ActionButton { objectName: "archiveFit"; text: qsTr("Весь архив"); enabled: page.tagIds.length > 0; onClicked: page.fitAll() }
+                    ActionButton { objectName: "archiveZoomIn"; text: "+"; onClicked: page.zoom(0.65, 0.5); ToolTip.visible: hovered; ToolTip.text: qsTr("Приблизить") }
+                    ActionButton { objectName: "archiveZoomOut"; text: "−"; onClicked: page.zoom(1.54, 0.5); ToolTip.visible: hovered; ToolTip.text: qsTr("Отдалить") }
+                    ActionButton { objectName: "archiveEarlier"; text: "‹"; onClicked: page.shift(-0.5); ToolTip.visible: hovered; ToolTip.text: qsTr("Раньше") }
+                    ActionButton { objectName: "archiveLater"; text: "›"; onClicked: page.shift(0.5); ToolTip.visible: hovered; ToolTip.text: qsTr("Позже") }
                     Item { Layout.fillWidth: true }
-                    ActionButton { objectName: "archiveInterval"; text: "Интервал…"; onClicked: periodDialog.edit() }
+                    ActionButton { objectName: "archiveInterval"; text: qsTr("Интервал…"); onClicked: periodDialog.edit() }
                     ActionButton { objectName: "archiveExport"; text: "CSV…"; enabled: page.tagIds.length > 0; onClicked: exportDialog.open() }
                 }
                 RowLayout {
@@ -249,13 +249,13 @@ Item {
                     }
                     ActionButton {
                         objectName: "archiveSeparate"
-                        text: "Раздельно"
+                        text: qsTr("Раздельно")
                         highlighted: !page.combined
                         onClicked: page.combined = false
                     }
                     ActionButton {
                         objectName: "archiveCombined"
-                        text: "Сводный"
+                        text: qsTr("Сводный")
                         highlighted: page.combined
                         onClicked: page.combined = true
                     }
@@ -263,24 +263,24 @@ Item {
                         objectName: "archiveMarkA"
                         text: "A"; enabled: page.cursor > 0
                         onClicked: page.markA = page.cursor
-                        ToolTip.visible: hovered; ToolTip.text: "Поставить метку A"
+                        ToolTip.visible: hovered; ToolTip.text: qsTr("Поставить метку A")
                     }
                     ActionButton {
                         objectName: "archiveMarkB"
                         text: "B"; enabled: page.cursor > 0
                         onClicked: page.markB = page.cursor
-                        ToolTip.visible: hovered; ToolTip.text: "Поставить метку B"
+                        ToolTip.visible: hovered; ToolTip.text: qsTr("Поставить метку B")
                     }
                     LabelValue {
                         visible: page.markA && page.markB
-                        text: "Δ " + (Math.abs(page.markB - page.markA) / 1000).toLocaleString(Qt.locale(), "f", 3) + " с"
+                        text: "Δ " + (Math.abs(page.markB - page.markA) / 1000).toLocaleString(Qt.locale(), "f", 3) + qsTr(" с")
                         mode: "strong"
                     }
                     ActionButton {
                         visible: page.markA || page.markB
                         objectName: "archiveClearMarks"
                         text: "×"; onClicked: { page.markA = 0; page.markB = 0 }
-                        ToolTip.visible: hovered; ToolTip.text: "Сбросить метки"
+                        ToolTip.visible: hovered; ToolTip.text: qsTr("Сбросить метки")
                     }
                 }
                 StackLayout {
@@ -322,7 +322,7 @@ Item {
                         LabelValue {
                             anchors.centerIn: parent
                             visible: tracks.count === 0
-                            text: list.model.length || page.api.tags.length ? "Выберите теги слева" : "В проекте ещё нет тегов"
+                            text: list.model.length || page.api.tags.length ? qsTr("Выберите теги слева") : qsTr("В проекте ещё нет тегов")
                             mode: "muted"
                         }
                         ScrollBar.vertical: ScrollBar {}
@@ -341,16 +341,16 @@ Item {
                                 Layout.rightMargin: 6
                                 LabelValue {
                                     Layout.fillWidth: true
-                                    text: "Сводный график · " + page.tagIds.length
+                                    text: qsTr("Сводный график · ") + page.tagIds.length
                                     mode: "strong"
                                 }
                                 ComboBox {
                                     id: scaleMode
                                     objectName: "archiveScaleMode"
                                     Layout.preferredWidth: 172
-                                    model: ["Общая шкала", "0–100% по каналу"]
+                                    model: [qsTr("Общая шкала"), qsTr("0–100% по каналу")]
                                     ToolTip.visible: hovered
-                                    ToolTip.text: "В режиме 0–100% минимум и максимум берутся из видимого интервала каждого канала."
+                                    ToolTip.text: qsTr("В режиме 0–100% минимум и максимум берутся из видимого интервала каждого канала.")
                                 }
                             }
                             ArchivePlot {
@@ -382,8 +382,8 @@ Item {
                     }
                 }
                 LabelValue {
-                    text: page.pinned ? "Курсор закреплён. Щёлкните по графику, чтобы освободить." :
-                        "Колесо — масштаб · перетаскивание — сдвиг времени · щелчок — закрепить курсор"
+                    text: page.pinned ? qsTr("Курсор закреплён. Щёлкните по графику, чтобы освободить.") :
+                        qsTr("Колесо — масштаб · перетаскивание — сдвиг времени · щелчок — закрепить курсор")
                     mode: "muted"; Layout.fillWidth: true; font.pixelSize: 11
                 }
             }
@@ -394,7 +394,7 @@ Item {
         id: periodDialog
         parent: Overlay.overlay
         anchors.centerIn: parent; modal: true; width: 390
-        title: "Интервал архива"
+        title: qsTr("Интервал архива")
         function edit() {
             dateFrom.text = Qt.formatDateTime(new Date(page.startTime), "yyyy-MM-dd HH:mm:ss")
             dateTo.text = Qt.formatDateTime(new Date(page.endTime), "yyyy-MM-dd HH:mm:ss")
@@ -408,15 +408,15 @@ Item {
         }
         contentItem: ColumnLayout {
             spacing: 9
-            Field { id: dateFrom; objectName: "archiveDateFrom"; caption: "Начало · ГГГГ-ММ-ДД ЧЧ:ММ:СС" }
-            Field { id: dateTo; objectName: "archiveDateTo"; caption: "Конец · ГГГГ-ММ-ДД ЧЧ:ММ:СС" }
-            LabelValue { id: badDate; objectName: "archiveInvalidDates"; visible: false; text: "Проверьте обе даты и порядок интервала."; mode: "error" }
+            Field { id: dateFrom; objectName: "archiveDateFrom"; caption: qsTr("Начало · ГГГГ-ММ-ДД ЧЧ:ММ:СС") }
+            Field { id: dateTo; objectName: "archiveDateTo"; caption: qsTr("Конец · ГГГГ-ММ-ДД ЧЧ:ММ:СС") }
+            LabelValue { id: badDate; objectName: "archiveInvalidDates"; visible: false; text: qsTr("Проверьте обе даты и порядок интервала."); mode: "error" }
             RowLayout {
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: periodDialog.close() }
+                ActionButton { text: qsTr("Отмена"); onClicked: periodDialog.close() }
                 ActionButton {
                     objectName: "archiveDateApply"
-                    text: "Показать"; highlighted: true
+                    text: qsTr("Показать"); highlighted: true
                     onClicked: {
                         const from = periodDialog.parse(dateFrom.text), to = periodDialog.parse(dateTo.text)
                         if (!isFinite(from) || !isFinite(to) || to <= from) { badDate.visible = true; return }
@@ -431,16 +431,16 @@ Item {
         id: exportDialog
         parent: Overlay.overlay
         anchors.centerIn: parent; modal: true; width: 360
-        title: "Экспорт видимого интервала CSV"
+        title: qsTr("Экспорт видимого интервала CSV")
         contentItem: ColumnLayout {
             spacing: 10
             ComboBox { id: exportChannel; Layout.fillWidth: true; model: page.showing; textRole: "name"; valueRole: "id" }
             RowLayout {
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: exportDialog.close() }
+                ActionButton { text: qsTr("Отмена"); onClicked: exportDialog.close() }
                 ActionButton {
                     objectName: "archiveExportApply"
-                    text: "Сохранить…"; highlighted: true; enabled: !!exportChannel.currentValue
+                    text: qsTr("Сохранить…"); highlighted: true; enabled: !!exportChannel.currentValue
                     onClicked: {
                         page.exportTag = exportChannel.currentValue
                         page.exportRange = page.range.slice()
@@ -454,9 +454,9 @@ Item {
     FileDialog {
         id: csv
         objectName: "archiveCsvPicker"
-        title: "Сохранить архив CSV"
+        title: qsTr("Сохранить архив CSV")
         fileMode: FileDialog.SaveFile
-        nameFilters: ["Таблица CSV (*.csv)"]
+        nameFilters: [qsTr("Таблица CSV (*.csv)")]
         onAccepted: page.api.exportCsv(selectedFile, page.exportTag, Math.round(page.exportRange[0]), Math.round(page.exportRange[1]))
     }
 }

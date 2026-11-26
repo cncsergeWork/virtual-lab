@@ -13,12 +13,12 @@
 ## Что переносить
 
 - Для запуска достаточно целиком скопировать папку актуальной сборки и открыть `Virtual-Lab.exe`.
-- Для продолжения разработки нужны `src/`, `qml/`, `tests/`, `assets/`, `CMakeLists.txt`, `build.ps1`, `engine-tags.json`, `README.md`, `AGENTS.md`, `QA.md`, `LICENSE`, `LICENSES/` и этот файл. Папку `build/` заново создаёт CMake. `.toolchain/` можно заново подготовить на другой машине.
+- Для продолжения разработки нужны `src/`, `qml/`, `tests/`, `assets/`, `translations/`, `CMakeLists.txt`, `build.ps1`, `engine-tags.json`, `README.md`, `AGENTS.md`, `QA.md`, `LICENSE`, `LICENSES/` и этот файл. Папку `build/` заново создаёт CMake. `.toolchain/` можно заново подготовить на другой машине.
 - Пользовательские проекты хранятся отдельно. Переносите вместе `*.scada.json`, `history.sqlite` и `images/`. Перед копированием базы закройте приложение. UUID проекта и тегов связывают конфигурацию с архивом.
 
 ## Сборка и тесты
 
-Рабочая конфигурация использует Qt 6.8.3 x64 MinGW, MinGW 13.1, CMake и Ninja. Qt-модули включают Qt Quick, Qt Quick Controls, Qt Network, Qt Serial Bus, Qt Serial Port, Qt WebSockets, Qt SQL с SQLite и Qt SVG. Переносимая сборка включает `Qt6Svg.dll` и `imageformats/qsvg.dll`. Для установленного отдельно Qt укажите `-QtRoot` и `-CompilerBin` при запуске скрипта.
+Рабочая конфигурация использует Qt 6.8.3 x64 MinGW, MinGW 13.1, CMake и Ninja. Qt-модули включают Qt Quick, Qt Quick Controls, Qt Network, Qt Serial Bus, Qt Serial Port, Qt WebSockets, Qt SQL с SQLite и Qt SVG. Для сборки переводов нужен Qt Linguist. Переносимая сборка включает `Qt6Svg.dll`, `imageformats/qsvg.dll` и каталоги интерфейса Qt. Для установленного отдельно Qt укажите `-QtRoot` и `-CompilerBin` при запуске скрипта.
 
 ```powershell
 .\build.ps1
@@ -30,13 +30,15 @@
 ```powershell
 py -3 -m venv .toolchain\venv
 .\.toolchain\venv\Scripts\python.exe -m pip install aqtinstall cmake ninja
-.\.toolchain\venv\Scripts\aqt.exe install-qt windows desktop 6.8.3 win64_mingw -O .toolchain\Qt --archives qtbase qtdeclarative qtshadertools qtsvg -m qtserialbus qtserialport qtwebsockets
+.\.toolchain\venv\Scripts\aqt.exe install-qt windows desktop 6.8.3 win64_mingw -O .toolchain\Qt --archives qtbase qtdeclarative qtshadertools qtsvg qttools qttranslations -m qtserialbus qtserialport qtwebsockets
 .\.toolchain\venv\Scripts\aqt.exe install-tool windows desktop tools_mingw1310 qt.tools.win64_mingw1310 -O .toolchain\Qt
 ```
 
 CTest запускает тесты ядра, основной сценарий QML через `--ui-test` и проверку кнопок и файлов через `--ui-audit`. Сценарии работают с временными проектами и отдельными настройками. Интеграционные тесты используют TCP-сокеты `127.0.0.1`. Интерфейсные тесты используют порт 15020 по очереди. Для снимков интерфейса задайте `SCADA_UI_CAPTURE` абсолютным путём к существующей папке. Таблица проверенных действий и границы прогона описаны в [QA.md](QA.md).
 
 В Windows CTest передаёт интерфейсным тестам путь к системным шрифтам для режима `offscreen`, если `QT_QPA_FONTDIR` не задан при конфигурации CMake.
+
+Язык интерфейса выбирается в меню **Проект → Язык интерфейса**. `InterfaceLanguage` хранит `ru` или `uk` в пользовательских настройках под ключом `ui/language`, обновляет `QLocale` и каталоги Qt. QML пересчитывает переводы через `QQmlEngine::retranslate`. Русские строки являются исходными, украинский каталог `translations/virtuallab_uk.ts` компилируется и встраивается в EXE. При добавлении строки используйте `qsTr` в QML или `QCoreApplication::translate` в C++, затем обновите каталог целью `update_translations`. Создаваемые проект и демо получают подписи на текущем языке. Смена языка сохраняет названия, подписи, текущий экран и данные открытого проекта. Тест `scada_ui_language` проверяет переключение в обе стороны, настройку языка и сообщения валидации.
 
 Исходник иконки — `assets/virtual-lab.svg`. При изменении рисунка обновите также `assets/virtual-lab.ico` с кадрами от 16 до 256 px. Ресурс `assets/virtual-lab.rc` встраивает ICO в Windows EXE, `src/main.cpp` использует его для окон Qt, верхняя панель рисует SVG.
 

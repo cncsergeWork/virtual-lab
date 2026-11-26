@@ -8,7 +8,7 @@ Dialog {
     id: dialog
     objectName: "faceplateBindingsDialog"
     required property var api
-    title: "Привязки тегов экземпляра"
+    title: qsTr("Привязки тегов экземпляра")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -28,16 +28,16 @@ Dialog {
     }
 
     function choices(type) {
-        return [{ id: "", name: "Без привязки" }].concat(api.tags.filter(tag => {
+        return [{ id: "", name: qsTr("Без привязки") }].concat(api.tags.filter(tag => {
             const tagType = tag.address?.type
             return type === "number" ? !!tagType && tagType !== "bool" && tagType !== "text" : tagType === type
         }))
     }
 
     function typeName(type) {
-        if (type === "number") return "Числовой"
-        if (type === "bool") return "Логический"
-        return "Текстовый"
+        if (type === "number") return qsTr("Числовой")
+        if (type === "bool") return qsTr("Логический")
+        return qsTr("Текстовый")
     }
 
     function save() {
@@ -59,12 +59,12 @@ Dialog {
         RowLayout {
             visible: ports.count > 0
             Layout.fillWidth: true
-            LabelValue { text: "Тег интерфейса"; Layout.preferredWidth: 235 }
-            LabelValue { text: "Тег проекта"; Layout.fillWidth: true }
+            LabelValue { text: qsTr("Тег интерфейса"); Layout.preferredWidth: 235 }
+            LabelValue { text: qsTr("Тег проекта"); Layout.fillWidth: true }
         }
         LabelValue {
             visible: ports.count === 0
-            text: "У этого типа пока нет тегов интерфейса."
+            text: qsTr("У этого типа пока нет тегов интерфейса.")
             mode: "muted"
             Layout.fillWidth: true
         }
@@ -92,7 +92,7 @@ Dialog {
                 }
                 ComboBox {
                     objectName: "faceplateBindingTag_" + row.index
-                    Accessible.name: "Тег проекта для " + row.model.portName
+                    Accessible.name: qsTr("Тег проекта для ") + row.model.portName
                     Layout.fillWidth: true
                     model: row.tagChoices
                     textRole: "name"
@@ -107,10 +107,10 @@ Dialog {
         RowLayout {
             Layout.fillWidth: true
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "faceplateBindingsApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 highlighted: true
                 onClicked: dialog.save()
             }

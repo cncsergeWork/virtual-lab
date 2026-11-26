@@ -33,7 +33,7 @@ Item {
     readonly property bool moveWithGroup: !locked && board.moving !== "" && board.moving !== config.id && selected
     readonly property bool compact: height < 100
     readonly property bool shallow: height < 76
-    readonly property string word: good ? "В работе" : reading.hasValue ? "Данные устарели" : config.tag ? "Нет данных" : "Тег не выбран"
+    readonly property string word: good ? qsTr("В работе") : reading.hasValue ? qsTr("Данные устарели") : config.tag ? qsTr("Нет данных") : qsTr("Тег не выбран")
     readonly property var appearance: config.appearance || ({})
     readonly property string appearanceTag: appearance.tag || config.tag ||
         config.trend?.series?.find(row => row.tag)?.tag || ""
@@ -291,7 +291,7 @@ Item {
             }
             Label {
                 Layout.fillWidth: true; elide: Text.ElideRight
-                text: widget.good ? (widget.reading.value !== 0 ? "Включён" : "Выключен") : "Нет данных"
+                text: widget.good ? (widget.reading.value !== 0 ? qsTr("Включён") : qsTr("Выключен")) : qsTr("Нет данных")
                 font.pixelSize: widget.shallow ? 15 : 20; font.weight: Font.DemiBold; color: widget.ink
             }
         }
@@ -351,7 +351,7 @@ Item {
                 LabelValue {
                     Layout.fillWidth: true
                     horizontalAlignment: Text.AlignHCenter
-                    text: widget.good ? (Number(widget.reading.value) !== 0 ? "Работает" : "Остановлен") : widget.word
+                    text: widget.good ? (Number(widget.reading.value) !== 0 ? qsTr("Работает") : qsTr("Остановлен")) : widget.word
                     color: widget.ink
                 }
             }
@@ -365,9 +365,9 @@ Item {
                 spacing: 5
                 LabelValue {
                     Layout.fillWidth: true
-                    text: widget.activeAlarm ? (widget.activeAlarm.ack ? "Квитирована" : "Тревога") :
-                        !widget.api.running ? "Опрос остановлен" : widget.config.tagUnbound ? "Тег тревоги не назначен" :
-                        widget.config.tag && !widget.good ? widget.word : "Активных тревог нет"
+                    text: widget.activeAlarm ? (widget.activeAlarm.ack ? qsTr("Квитирована") : qsTr("Тревога")) :
+                        !widget.api.running ? qsTr("Опрос остановлен") : widget.config.tagUnbound ? qsTr("Тег тревоги не назначен") :
+                        widget.config.tag && !widget.good ? widget.word : qsTr("Активных тревог нет")
                     font.weight: Font.DemiBold
                     color: widget.valueOverride || (widget.activeAlarm ? (widget.darkSurface ? "#ffad86" : "#a6442b") : widget.ink)
                 }
@@ -375,13 +375,13 @@ Item {
                     Layout.fillWidth: true
                     visible: !!widget.activeAlarm && widget.height > 100
                     text: widget.activeAlarm ? widget.activeAlarm.name + " · " +
-                        (widget.activeAlarm.high ? "Верхний порог " : "Нижний порог ") + widget.activeAlarm.limit : ""
+                        (widget.activeAlarm.high ? qsTr("Верхний порог ") : qsTr("Нижний порог ")) + widget.activeAlarm.limit : ""
                     color: widget.secondary
                 }
                 ActionButton {
                     objectName: "ackWidgetAlarm"
                     compact: true
-                    text: "Квитировать"
+                    text: qsTr("Квитировать")
                     visible: !!widget.activeAlarm && !widget.activeAlarm.ack
                     enabled: widget.operating
                     onClicked: if (widget.activeAlarm) widget.api.acknowledge(widget.activeAlarm.tag)
@@ -443,7 +443,7 @@ Item {
             visible: widget.config.kind === "image" && !widget.config.image
             Layout.fillWidth: true; Layout.fillHeight: true
             horizontalAlignment: Text.AlignHCenter
-            text: "Выберите файл изображения"; color: widget.ink
+            text: qsTr("Выберите файл изображения"); color: widget.ink
         }
         ActionEventButton {
             objectName: widget.config.kind + "Action"

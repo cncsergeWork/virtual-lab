@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCoreApplication>
 #include <QJsonObject>
 #include <QObject>
 #include <QVariant>
@@ -16,7 +17,7 @@ public:
     virtual bool supportsRead() const { return false; }
     virtual QString read(const QJsonObject &, quint64)
     {
-        return QStringLiteral("Источник передаёт данные сам. Внеочередное чтение недоступно.");
+        return QCoreApplication::translate("DataSource", "Источник передаёт данные сам. Внеочередное чтение недоступно.");
     }
     virtual QString write(const QJsonObject &tag, double value) = 0;
 

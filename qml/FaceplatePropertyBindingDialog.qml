@@ -16,23 +16,23 @@ Dialog {
     readonly property bool visibilityRule: fieldKind === "visible"
     readonly property bool usesAlarm: condition.currentValue === "alarm"
     readonly property bool usesRange: condition.currentValue === "between" || condition.currentValue === "outside"
-    readonly property var tagChoices: [{ id: "", name: "Выберите тег" }].concat(
+    readonly property var tagChoices: [{ id: "", name: qsTr("Выберите тег") }].concat(
         api.tags.filter(tag => tag.address?.type && tag.address.type !== "text"))
     readonly property var operators: [
-        { id: "alarm", name: "Авария активна" },
-        { id: "lt", name: "Меньше" },
-        { id: "lte", name: "Меньше или равно" },
-        { id: "eq", name: "Равно" },
-        { id: "ne", name: "Не равно" },
-        { id: "gte", name: "Больше или равно" },
-        { id: "gt", name: "Больше" },
-        { id: "between", name: "В диапазоне" },
-        { id: "outside", name: "Вне диапазона" }
+        { id: "alarm", name: qsTr("Авария активна") },
+        { id: "lt", name: qsTr("Меньше") },
+        { id: "lte", name: qsTr("Меньше или равно") },
+        { id: "eq", name: qsTr("Равно") },
+        { id: "ne", name: qsTr("Не равно") },
+        { id: "gte", name: qsTr("Больше или равно") },
+        { id: "gt", name: qsTr("Больше") },
+        { id: "between", name: qsTr("В диапазоне") },
+        { id: "outside", name: qsTr("Вне диапазона") }
     ]
     signal bindingEdited(string propertyId, var binding)
     signal chooseColor(var field)
 
-    title: "Динамическая привязка"
+    title: qsTr("Динамическая привязка")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -68,21 +68,21 @@ Dialog {
 
     function save() {
         if (!sourceTag.currentValue) {
-            errorText = "Выберите тег проекта."
+            errorText = qsTr("Выберите тег проекта.")
             return
         }
         const binding = { tag: sourceTag.currentValue, op: condition.currentValue }
         if (!usesAlarm) {
             binding.limit = number(limit.text)
             if (!Number.isFinite(binding.limit)) {
-                errorText = "Укажите числовой порог."
+                errorText = qsTr("Укажите числовой порог.")
                 return
             }
         }
         if (usesRange) {
             binding.max = number(upperLimit.text)
             if (!Number.isFinite(binding.max) || binding.max < binding.limit) {
-                errorText = "Верхняя граница должна быть числом и быть не меньше нижней."
+                errorText = qsTr("Верхняя граница должна быть числом и быть не меньше нижней.")
                 return
             }
         }
@@ -91,7 +91,7 @@ Dialog {
             binding.otherwise = visibilityRule ? otherwiseVisible.checked : otherwiseColor.text.trim()
         if (!visibilityRule && (!validColor(binding.value) ||
             (useOtherwise.checked && !validColor(binding.otherwise)))) {
-            errorText = "Укажите цвет в формате #RRGGBB."
+            errorText = qsTr("Укажите цвет в формате #RRGGBB.")
             return
         }
         bindingEdited(propertyId, binding)
@@ -106,11 +106,11 @@ Dialog {
             Layout.fillWidth: true
             rowSpacing: 6
             columnSpacing: 12
-            LabelValue { text: "Тег проекта"; Layout.preferredWidth: 175 }
+            LabelValue { text: qsTr("Тег проекта"); Layout.preferredWidth: 175 }
             ComboBox {
                 id: sourceTag
                 objectName: "faceplateBindingConditionTag"
-                Accessible.name: "Тег проекта"
+                Accessible.name: qsTr("Тег проекта")
                 Layout.fillWidth: true
                 model: dialog.tagChoices
                 textRole: "name"
@@ -118,11 +118,11 @@ Dialog {
                 ToolTip.visible: hovered && currentIndex > 0
                 ToolTip.text: currentText
             }
-            LabelValue { text: "Условие" }
+            LabelValue { text: qsTr("Условие") }
             ComboBox {
                 id: condition
                 objectName: "faceplateBindingConditionOp"
-                Accessible.name: "Условие"
+                Accessible.name: qsTr("Условие")
                 Layout.fillWidth: true
                 model: dialog.operators
                 textRole: "name"
@@ -134,67 +134,67 @@ Dialog {
                 Layout.columnSpan: 2
                 Layout.fillWidth: true
                 mode: "muted"
-                text: "Для этого условия настройте аварию в свойствах тега."
+                text: qsTr("Для этого условия настройте аварию в свойствах тега.")
             }
-            LabelValue { visible: !dialog.usesAlarm; text: dialog.usesRange ? "Нижняя граница" : "Порог" }
+            LabelValue { visible: !dialog.usesAlarm; text: dialog.usesRange ? qsTr("Нижняя граница") : qsTr("Порог") }
             TextField {
                 id: limit
                 objectName: "faceplateBindingConditionLimit"
-                Accessible.name: dialog.usesRange ? "Нижняя граница" : "Порог"
+                Accessible.name: dialog.usesRange ? qsTr("Нижняя граница") : qsTr("Порог")
                 visible: !dialog.usesAlarm
                 Layout.fillWidth: true
                 selectByMouse: true
             }
-            LabelValue { visible: dialog.usesRange; text: "Верхняя граница" }
+            LabelValue { visible: dialog.usesRange; text: qsTr("Верхняя граница") }
             TextField {
                 id: upperLimit
                 objectName: "faceplateBindingConditionMax"
-                Accessible.name: "Верхняя граница"
+                Accessible.name: qsTr("Верхняя граница")
                 visible: dialog.usesRange
                 Layout.fillWidth: true
                 selectByMouse: true
             }
-            LabelValue { text: "Если выполнено" }
+            LabelValue { text: qsTr("Если выполнено") }
             CheckBox {
                 id: matchVisible
                 objectName: "faceplateBindingMatchVisible"
                 visible: dialog.visibilityRule
-                text: "Показывать"
+                text: qsTr("Показывать")
             }
             ColorField {
                 id: matchColor
                 objectName: "faceplateBindingMatchColor"
                 visible: !dialog.visibilityRule
                 Layout.fillWidth: true
-                caption: "Цвет при выполнении условия"
+                caption: qsTr("Цвет при выполнении условия")
                 hint: "#RRGGBB"
                 onChoose: field => dialog.chooseColor(field)
             }
-            LabelValue { text: "Иначе" }
+            LabelValue { text: qsTr("Иначе") }
             CheckBox {
                 id: useOtherwise
                 objectName: "faceplateBindingUseOtherwise"
-                text: "Задать значение"
+                text: qsTr("Задать значение")
             }
             Item { implicitWidth: 1; implicitHeight: 1 }
             LabelValue {
                 visible: !useOtherwise.checked
                 Layout.fillWidth: true
                 mode: "muted"
-                text: "Значение из свойств экземпляра или типа"
+                text: qsTr("Значение из свойств экземпляра или типа")
             }
             CheckBox {
                 id: otherwiseVisible
                 objectName: "faceplateBindingOtherwiseVisible"
                 visible: dialog.visibilityRule && useOtherwise.checked
-                text: "Показывать"
+                text: qsTr("Показывать")
             }
             ColorField {
                 id: otherwiseColor
                 objectName: "faceplateBindingOtherwiseColor"
                 visible: !dialog.visibilityRule && useOtherwise.checked
                 Layout.fillWidth: true
-                caption: "Цвет, когда условие не выполнено"
+                caption: qsTr("Цвет, когда условие не выполнено")
                 hint: "#RRGGBB"
                 onChoose: field => dialog.chooseColor(field)
             }
@@ -211,17 +211,17 @@ Dialog {
             ActionButton {
                 objectName: "faceplateBindingConditionRemove"
                 visible: dialog.existingBinding
-                text: "Удалить привязку"
+                text: qsTr("Удалить привязку")
                 onClicked: {
                     dialog.bindingEdited(dialog.propertyId, null)
                     dialog.close()
                 }
             }
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "faceplateBindingConditionApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 highlighted: true
                 onClicked: dialog.save()
             }

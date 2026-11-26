@@ -9,10 +9,10 @@ Dialog {
     property var widget: ({})
     property int revision: 0
     property var colorTarget: null
-    readonly property var operators: [{ name: "Меньше", id: "lt" }, { name: "Меньше или равно", id: "lte" },
-        { name: "Равно", id: "eq" }, { name: "Не равно", id: "ne" }, { name: "Больше или равно", id: "gte" },
-        { name: "Больше", id: "gt" }, { name: "В диапазоне", id: "between" }, { name: "Вне диапазона", id: "outside" }]
-    readonly property var choices: [{ id: "", name: "Тег виджета" }].concat(api.editorTags.filter(t => t.address?.type !== "text"))
+    readonly property var operators: [{ name: qsTr("Меньше"), id: "lt" }, { name: qsTr("Меньше или равно"), id: "lte" },
+        { name: qsTr("Равно"), id: "eq" }, { name: qsTr("Не равно"), id: "ne" }, { name: qsTr("Больше или равно"), id: "gte" },
+        { name: qsTr("Больше"), id: "gt" }, { name: qsTr("В диапазоне"), id: "between" }, { name: qsTr("Вне диапазона"), id: "outside" }]
+    readonly property var choices: [{ id: "", name: qsTr("Тег виджета") }].concat(api.editorTags.filter(t => t.address?.type !== "text"))
     readonly property var testReading: {
         if (sampleField.text.trim()) {
             const n = number(sampleField.text)
@@ -23,8 +23,8 @@ Dialog {
     readonly property var preview: revision >= 0 ? api.widgetColors(options(), testReading) : {}
     readonly property bool layerRules: api.compositeDepth > 0 ||
         (widget.appearance?.rules || []).some(rule => rule.visible !== undefined || rule.text !== undefined)
-    readonly property var visibilityOptions: ["Как обычно", "Показать", "Скрыть"]
-    title: layerRules ? "Оформление и условия слоя" : "Цвета и пороги"
+    readonly property var visibilityOptions: [qsTr("Как обычно"), qsTr("Показать"), qsTr("Скрыть")]
+    title: layerRules ? qsTr("Оформление и условия слоя") : qsTr("Цвета и пороги")
     modal: true
     parent: Overlay.overlay
     anchors.centerIn: parent
@@ -95,7 +95,7 @@ Dialog {
     ColorDialog {
         id: colorPicker
         objectName: "appearanceColorPicker"
-        title: "Выбрать цвет"
+        title: qsTr("Выбрать цвет")
         onAccepted: {
             if (form.colorTarget) form.colorTarget.setColor(form.rgb(selectedColor))
             form.colorTarget = null
@@ -109,29 +109,29 @@ Dialog {
             Layout.fillWidth: true
             ColumnLayout {
                 Layout.preferredWidth: 164
-                LabelValue { text: "Фон"; mode: "strong" }
+                LabelValue { text: qsTr("Фон"); mode: "strong" }
                 ColorField {
                     id: baseBackground
                     objectName: "appearanceBackground"
-                    caption: "Цвет фона"
+                    caption: qsTr("Цвет фона")
                     Layout.fillWidth: true
                     onChoose: field => form.pick(field)
                 }
             }
             ColumnLayout {
                 Layout.preferredWidth: 164
-                LabelValue { text: "Показание"; mode: "strong" }
+                LabelValue { text: qsTr("Показание"); mode: "strong" }
                 ColorField {
                     id: baseValue
                     objectName: "appearanceValue"
-                    caption: "Цвет показания"
+                    caption: qsTr("Цвет показания")
                     Layout.fillWidth: true
                     onChoose: field => form.pick(field)
                 }
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Тег для условий"; mode: "strong" }
+                LabelValue { text: qsTr("Тег для условий"); mode: "strong" }
                 ComboBox {
                     id: trigger
                     objectName: "appearanceTag"
@@ -145,8 +145,8 @@ Dialog {
             Field {
                 id: sampleField
                 objectName: "appearanceSample"
-                caption: "Пробное значение"
-                placeholderText: "Пусто — текущее показание"
+                caption: qsTr("Пробное значение")
+                placeholderText: qsTr("Пусто — текущее показание")
                 Layout.preferredWidth: 236
                 Layout.fillWidth: false
             }
@@ -161,8 +161,8 @@ Dialog {
                 LabelValue {
                     id: sampleLabel
                     anchors.centerIn: parent
-                    text: form.preview.visible === false ? "Слой скрыт" :
-                        form.preview.text ?? (form.testReading.hasValue ? String(form.testReading.value) : "Пример показания")
+                    text: form.preview.visible === false ? qsTr("Слой скрыт") :
+                        form.preview.text ?? (form.testReading.hasValue ? String(form.testReading.value) : qsTr("Пример показания"))
                     color: form.valid(form.preview.value) ? form.preview.value :
                         ((parent.color.r * 0.2126 + parent.color.g * 0.7152 + parent.color.b * 0.0722) < 0.55 ? "#edf4fa" : "#13263b")
                     font.weight: Font.DemiBold
@@ -171,18 +171,18 @@ Dialog {
             }
         }
         LabelValue {
-            text: "Правила проверяются сверху вниз. Срабатывает первое подходящее."
+            text: qsTr("Правила проверяются сверху вниз. Срабатывает первое подходящее.")
             mode: "muted"; Layout.fillWidth: true
         }
         RowLayout {
             Layout.fillWidth: true
-            LabelValue { text: "Условие"; Layout.preferredWidth: form.layerRules ? 143 : 176 }
-            LabelValue { text: "Порог"; Layout.preferredWidth: form.layerRules ? 67 : 85 }
-            LabelValue { text: form.layerRules ? "До" : "Верхняя граница"; Layout.preferredWidth: form.layerRules ? 67 : 105 }
-            LabelValue { text: "Фон"; Layout.fillWidth: true; Layout.preferredWidth: 115 }
-            LabelValue { text: "Показание"; Layout.fillWidth: true; Layout.preferredWidth: 115 }
-            LabelValue { visible: form.layerRules; text: "Видимость"; Layout.preferredWidth: 120 }
-            LabelValue { visible: form.layerRules; text: "Подпись"; Layout.fillWidth: true; Layout.preferredWidth: 125 }
+            LabelValue { text: qsTr("Условие"); Layout.preferredWidth: form.layerRules ? 143 : 176 }
+            LabelValue { text: qsTr("Порог"); Layout.preferredWidth: form.layerRules ? 67 : 85 }
+            LabelValue { text: form.layerRules ? qsTr("До") : qsTr("Верхняя граница"); Layout.preferredWidth: form.layerRules ? 67 : 105 }
+            LabelValue { text: qsTr("Фон"); Layout.fillWidth: true; Layout.preferredWidth: 115 }
+            LabelValue { text: qsTr("Показание"); Layout.fillWidth: true; Layout.preferredWidth: 115 }
+            LabelValue { visible: form.layerRules; text: qsTr("Видимость"); Layout.preferredWidth: 120 }
+            LabelValue { visible: form.layerRules; text: qsTr("Подпись"); Layout.fillWidth: true; Layout.preferredWidth: 125 }
             Item { Layout.preferredWidth: 118 }
         }
         ListView {
@@ -210,7 +210,7 @@ Dialog {
                     objectName: "appearanceLimit_" + row.index
                     Layout.preferredWidth: form.layerRules ? 67 : 85
                     Layout.preferredHeight: 33
-                    placeholderText: "Число"
+                    placeholderText: qsTr("Число")
                     text: row.model.low
                     onTextEdited: form.replace(row.index, "low", text)
                 }
@@ -219,7 +219,7 @@ Dialog {
                     Layout.preferredWidth: form.layerRules ? 67 : 105
                     Layout.preferredHeight: 33
                     enabled: row.interval
-                    placeholderText: row.interval ? "Число" : "—"
+                    placeholderText: row.interval ? qsTr("Число") : "—"
                     text: row.interval ? row.model.high : ""
                     onTextEdited: form.replace(row.index, "high", text)
                 }
@@ -228,8 +228,8 @@ Dialog {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 115
                     text: row.model.bg
-                    hint: "Основной"
-                    caption: "Цвет фона по правилу"
+                    hint: qsTr("Основной")
+                    caption: qsTr("Цвет фона по правилу")
                     onChoose: field => form.pick(field)
                     onEdited: value => form.replace(row.index, "bg", value)
                 }
@@ -238,8 +238,8 @@ Dialog {
                     Layout.fillWidth: true
                     Layout.preferredWidth: 115
                     text: row.model.fg
-                    hint: "Основной"
-                    caption: "Цвет показания по правилу"
+                    hint: qsTr("Основной")
+                    caption: qsTr("Цвет показания по правилу")
                     onChoose: field => form.pick(field)
                     onEdited: value => form.replace(row.index, "fg", value)
                 }
@@ -255,7 +255,7 @@ Dialog {
                     objectName: "appearanceRuleText_" + row.index
                     visible: form.layerRules
                     Layout.fillWidth: true; Layout.preferredWidth: 125
-                    placeholderText: "Основная"
+                    placeholderText: qsTr("Основная")
                     maximumLength: 240
                     text: row.model.caption
                     onTextEdited: form.replace(row.index, "caption", text)
@@ -264,25 +264,25 @@ Dialog {
                     objectName: "appearanceRuleUp_" + row.index
                     text: "↑"; enabled: row.index > 0
                     onClicked: form.move(row.index, row.index - 1)
-                    ToolTip.visible: hovered; ToolTip.text: "Выше в списке"
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Выше в списке")
                 }
                 ActionButton {
                     objectName: "appearanceRuleDown_" + row.index
                     text: "↓"; enabled: row.index + 1 < list.count
                     onClicked: form.move(row.index, row.index + 1)
-                    ToolTip.visible: hovered; ToolTip.text: "Ниже в списке"
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Ниже в списке")
                 }
                 ActionButton {
                     objectName: "appearanceRuleRemove_" + row.index
                     text: "×"; onClicked: form.remove(row.index)
-                    ToolTip.visible: hovered; ToolTip.text: "Удалить правило"
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Удалить правило")
                 }
             }
             ScrollBar.vertical: ScrollBar {}
             LabelValue {
                 anchors.centerIn: parent
                 visible: list.count === 0
-                text: "Можно оставить только основные цвета."
+                text: qsTr("Можно оставить только основные цвета.")
                 mode: "muted"
             }
         }
@@ -291,12 +291,12 @@ Dialog {
             ActionButton {
                 objectName: "appearanceAdd"
                 enabled: entries.count < 32
-                text: "+ Правило"
+                text: qsTr("+ Правило")
                 onClicked: { form.add({}); list.positionViewAtEnd() }
             }
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: form.close() }
-            ActionButton { objectName: "appearanceSave"; text: "Применить"; highlighted: true; onClicked: form.save() }
+            ActionButton { text: qsTr("Отмена"); onClicked: form.close() }
+            ActionButton { objectName: "appearanceSave"; text: qsTr("Применить"); highlighted: true; onClicked: form.save() }
         }
     }
 }

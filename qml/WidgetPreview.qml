@@ -12,10 +12,10 @@ Dialog {
     property var journal: []
     readonly property var ports: api.editorTags
     readonly property var canvas: api.canvasSettings
-    readonly property var eventNames: ({ press: "Нажал", release: "Отпустил", click: "Щёлкнул", change: "Изменил" })
+    readonly property var eventNames: ({ press: qsTr("Нажал"), release: qsTr("Отпустил"), click: qsTr("Щёлкнул"), change: qsTr("Изменил") })
     readonly property var simulation: ({ samples: samples, record: record })
 
-    title: "Предпросмотр · " + (canvas.name ?? "")
+    title: qsTr("Предпросмотр · ") + (canvas.name ?? "")
     parent: Overlay.overlay
     anchors.centerIn: parent
     width: Math.min(1040, parent ? parent.width - 32 : 1040)
@@ -32,10 +32,10 @@ Dialog {
         for (const request of requests) {
             const target = ports.find(port => port.id === request.tag)
             if (!target) continue
-            let action = "прочитать «" + target.name + "»"
+            let action = qsTr("прочитать «") + target.name + "»"
             if (request.action === "write") {
                 const value = request.valueTag ? samples[request.valueTag]?.value : request.value
-                action = "записать в «" + target.name + "» " + (value ?? "— (нет значения)")
+                action = qsTr("записать в «") + target.name + "» " + (value ?? qsTr("— (нет значения)"))
                 if (value !== undefined) updateSample(request.tag, target.address?.type === "bool" ? !!Number(value) : value)
             }
             lines.push((eventNames[eventName] ?? eventName) + " · " + layer + " · " + action)
@@ -62,7 +62,7 @@ Dialog {
             Layout.maximumWidth: 238
             Layout.fillWidth: false
             Layout.fillHeight: true
-            LabelValue { text: "Пробные значения"; mode: "strong" }
+            LabelValue { text: qsTr("Пробные значения"); mode: "strong" }
             ScrollView {
                 Layout.fillWidth: true; Layout.fillHeight: true
                 contentWidth: availableWidth
@@ -104,7 +104,7 @@ Dialog {
                     }
                 }
             }
-            ActionButton { text: "Сбросить"; onClicked: previewDialog.start() }
+            ActionButton { text: qsTr("Сбросить"); onClicked: previewDialog.start() }
         }
         ColumnLayout {
             Layout.fillWidth: true; Layout.fillHeight: true
@@ -146,9 +146,9 @@ Dialog {
             }
             RowLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Действия в симуляции"; mode: "strong" }
+                LabelValue { text: qsTr("Действия в симуляции"); mode: "strong" }
                 Item { Layout.fillWidth: true }
-                ActionButton { objectName: "widgetPreviewClose"; text: "Закрыть"; onClicked: previewDialog.close() }
+                ActionButton { objectName: "widgetPreviewClose"; text: qsTr("Закрыть"); onClicked: previewDialog.close() }
             }
             ListView {
                 objectName: "previewJournal"

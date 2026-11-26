@@ -9,12 +9,12 @@ Dialog {
     objectName: "faceplatePortsDialog"
     required property var api
     readonly property var types: [
-        { id: "number", name: "Числовой" },
-        { id: "bool", name: "Логический" },
-        { id: "text", name: "Текстовый" }
+        { id: "number", name: qsTr("Числовой") },
+        { id: "bool", name: qsTr("Логический") },
+        { id: "text", name: qsTr("Текстовый") }
     ]
     property string typeName: ""
-    title: "Интерфейс тегов"
+    title: qsTr("Интерфейс тегов")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -50,20 +50,20 @@ Dialog {
         }
         Label {
             Layout.fillWidth: true
-            text: "Внутренние элементы используют теги интерфейса. Теги проекта выбираются у каждого экземпляра."
+            text: qsTr("Внутренние элементы используют теги интерфейса. Теги проекта выбираются у каждого экземпляра.")
             color: "#526579"
             wrapMode: Text.WordWrap
         }
         RowLayout {
             visible: ports.count > 0
             Layout.fillWidth: true
-            LabelValue { text: "Тег интерфейса"; Layout.fillWidth: true }
-            LabelValue { text: "Тип данных"; Layout.preferredWidth: 146 }
+            LabelValue { text: qsTr("Тег интерфейса"); Layout.fillWidth: true }
+            LabelValue { text: qsTr("Тип данных"); Layout.preferredWidth: 146 }
             Item { Layout.preferredWidth: 38 }
         }
         LabelValue {
             visible: ports.count === 0
-            text: "Добавьте тег интерфейса, чтобы привязать данные к виджету."
+            text: qsTr("Добавьте тег интерфейса, чтобы привязать данные к виджету.")
             mode: "muted"
             Layout.fillWidth: true
         }
@@ -84,16 +84,16 @@ Dialog {
                 height: 36
                 TextField {
                     objectName: "faceplatePortName_" + row.index
-                    Accessible.name: "Имя тега интерфейса"
+                    Accessible.name: qsTr("Имя тега интерфейса")
                     Layout.fillWidth: true
-                    placeholderText: "Например, Давление"
+                    placeholderText: qsTr("Например, Давление")
                     text: row.model.portName
                     onTextChanged: if (text !== row.model.portName)
                         ports.setProperty(row.index, "portName", text)
                 }
                 ComboBox {
                     objectName: "faceplatePortType_" + row.index
-                    Accessible.name: "Тип данных тега интерфейса"
+                    Accessible.name: qsTr("Тип данных тега интерфейса")
                     Layout.preferredWidth: 146
                     model: dialog.types
                     textRole: "name"
@@ -105,7 +105,7 @@ Dialog {
                     compact: true
                     text: "×"
                     objectName: "faceplatePortRemove_" + row.index
-                    Accessible.name: "Удалить тег интерфейса"
+                    Accessible.name: qsTr("Удалить тег интерфейса")
                     onClicked: ports.remove(row.index)
                 }
             }
@@ -114,17 +114,17 @@ Dialog {
             Layout.fillWidth: true
             ActionButton {
                 objectName: "faceplatePortAdd"
-                text: "+ Тег интерфейса"
+                text: qsTr("+ Тег интерфейса")
                 onClicked: {
                     ports.append({ portId: "", portName: "", typeId: "number" })
                     portList.positionViewAtEnd()
                 }
             }
             Item { Layout.fillWidth: true }
-            ActionButton { objectName: "faceplatePortsCancel"; text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { objectName: "faceplatePortsCancel"; text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "faceplatePortsApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 highlighted: true
                 onClicked: dialog.save()
             }

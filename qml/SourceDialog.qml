@@ -10,7 +10,7 @@ Dialog {
     readonly property bool serial: transportBox.currentIndex === 1
     modal: true
     width: 470
-    title: entry.id ? "Параметры источника" : "Новый источник"
+    title: entry.id ? qsTr("Параметры источника") : qsTr("Новый источник")
     function edit(item) {
         entry = item || {}
         driverBox.currentIndex = entry.driver === "engine-json" ? 1 : 0
@@ -33,48 +33,48 @@ Dialog {
             id: driverBox
             objectName: "sourceDriver"
             Layout.fillWidth: true
-            model: ["Modbus TCP", "JSON-телеметрия"]
+            model: ["Modbus TCP", qsTr("JSON-телеметрия")]
             enabled: !form.entry.id
         }
-        Field { id: nameField; objectName: "sourceName"; caption: "Имя источника"; placeholderText: "Например, ПЛК участка" }
-        Field { id: hostField; objectName: "sourceHost"; visible: !form.engine; caption: "IP-адрес или имя узла"; placeholderText: "192.168.1.10"; enabled: !form.entry.settings?.simulator }
+        Field { id: nameField; objectName: "sourceName"; caption: qsTr("Имя источника"); placeholderText: qsTr("Например, ПЛК участка") }
+        Field { id: hostField; objectName: "sourceHost"; visible: !form.engine; caption: qsTr("IP-адрес или имя узла"); placeholderText: "192.168.1.10"; enabled: !form.entry.settings?.simulator }
         RowLayout {
             visible: !form.engine
             Layout.fillWidth: true
-            Field { id: portField; caption: "Порт" }
-            Field { id: pollField; caption: "Опрос, мс" }
-            Field { id: timeoutField; caption: "Тайм-аут, мс" }
+            Field { id: portField; caption: qsTr("Порт") }
+            Field { id: pollField; caption: qsTr("Опрос, мс") }
+            Field { id: timeoutField; caption: qsTr("Тайм-аут, мс") }
         }
-        CheckBox { id: writeBox; objectName: "sourceAllowWrite"; visible: !form.engine; text: "Разрешить запись в этом подключении" }
+        CheckBox { id: writeBox; objectName: "sourceAllowWrite"; visible: !form.engine; text: qsTr("Разрешить запись в этом подключении") }
         ComboBox {
             id: transportBox
             objectName: "jsonTransport"
             visible: form.engine
-            model: ["JSON по WebSocket", "JSON по USB COM · 115200"]
+            model: [qsTr("JSON по WebSocket"), qsTr("JSON по USB COM · 115200")]
             Layout.fillWidth: true
         }
-        LabelValue { visible: form.engine; text: "Протокол телеметрии v1"; mode: "muted" }
+        LabelValue { visible: form.engine; text: qsTr("Протокол телеметрии v1"); mode: "muted" }
         Field {
             id: urlField
             objectName: "engineUrl"
             visible: form.engine && !form.serial
-            caption: "Адрес WebSocket"
+            caption: qsTr("Адрес WebSocket")
             placeholderText: "ws://192.168.4.1:81/ws"
         }
-        Field { id: serialField; objectName: "sourceSerialPort"; visible: form.engine && form.serial; caption: "Последовательный порт"; placeholderText: "COM7" }
-        Field { id: engineTimeout; visible: form.engine; caption: "Тайм-аут телеметрии, мс" }
+        Field { id: serialField; objectName: "sourceSerialPort"; visible: form.engine && form.serial; caption: qsTr("Последовательный порт"); placeholderText: "COM7" }
+        Field { id: engineTimeout; visible: form.engine; caption: qsTr("Тайм-аут телеметрии, мс") }
         CheckBox {
             id: presetBox
             objectName: "jsonSampleTags"
             visible: form.engine && !form.entry.id
-            text: "Загрузить пример таблицы тегов"
+            text: qsTr("Загрузить пример таблицы тегов")
         }
         RowLayout {
             Layout.fillWidth: true
             Item { Layout.fillWidth: true }
-            ActionButton { objectName: "sourceCancel"; text: "Отмена"; onClicked: form.close() }
+            ActionButton { objectName: "sourceCancel"; text: qsTr("Отмена"); onClicked: form.close() }
             ActionButton {
-                text: "Сохранить"
+                text: qsTr("Сохранить")
                 objectName: "sourceSave"
                 highlighted: true
                 onClicked: {

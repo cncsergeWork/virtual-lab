@@ -7,14 +7,14 @@ Dialog {
     id: dialog
     objectName: "trendDialog"
     required property var api
-    readonly property var choices: [{ id: "", name: "Выбрать тег" }].concat(api.editorTags.filter(t => t.address?.type !== "text"))
+    readonly property var choices: [{ id: "", name: qsTr("Выбрать тег") }].concat(api.editorTags.filter(t => t.address?.type !== "text"))
     readonly property var accents: ["#008975", "#bd6200", "#ae3e70", "#3368bc", "#8546ac", "#64772b", "#39758a", "#97472e"]
-    readonly property var styles: [{ name: "Авто", id: "auto" }, { name: "Линия", id: "line" },
-                                    { name: "Ступени", id: "step" }, { name: "Точки", id: "points" }]
-    readonly property var timeModes: [{ name: "Автоматически", id: "auto" }, { name: "От конца периода", id: "relative" },
-                                      { name: "Время записи", id: "clock" }]
+    readonly property var styles: [{ name: qsTr("Авто"), id: "auto" }, { name: qsTr("Линия"), id: "line" },
+                                    { name: qsTr("Ступени"), id: "step" }, { name: qsTr("Точки"), id: "points" }]
+    readonly property var timeModes: [{ name: qsTr("Автоматически"), id: "auto" }, { name: qsTr("От конца периода"), id: "relative" },
+                                      { name: qsTr("Время записи"), id: "clock" }]
     property var colorTarget: null
-    title: "Настройка графика"
+    title: qsTr("Настройка графика")
     modal: true
     parent: Overlay.overlay
     anchors.centerIn: parent
@@ -56,7 +56,7 @@ Dialog {
     }
     Native.ColorDialog {
         id: colorPicker
-        title: "Цвет ряда"
+        title: qsTr("Цвет ряда")
         onAccepted: {
             const color = selectedColor
             const hex = channel => Math.round(channel * 255).toString(16).padStart(2, "0")
@@ -70,22 +70,22 @@ Dialog {
         spacing: 10
         RowLayout {
             Layout.fillWidth: true
-            Field { id: seconds; caption: "Период по умолчанию, сек"; Layout.preferredWidth: 186 }
+            Field { id: seconds; caption: qsTr("Период по умолчанию, сек"); Layout.preferredWidth: 186 }
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Вертикальные шкалы"; mode: "muted" }
+                LabelValue { text: qsTr("Вертикальные шкалы"); mode: "muted" }
                 ComboBox {
                     id: axes
                     objectName: "trendAxisMode"
                     Layout.fillWidth: true
                     textRole: "name"; valueRole: "id"
-                    model: [{ name: "Общая", id: "shared" }, { name: "Левая и правая", id: "dual" },
-                            { name: "Отдельная для каждого ряда", id: "individual" }]
+                    model: [{ name: qsTr("Общая"), id: "shared" }, { name: qsTr("Левая и правая"), id: "dual" },
+                            { name: qsTr("Отдельная для каждого ряда"), id: "individual" }]
                 }
             }
             ColumnLayout {
                 Layout.preferredWidth: 173
-                LabelValue { text: "Подписи времени"; mode: "muted" }
+                LabelValue { text: qsTr("Подписи времени"); mode: "muted" }
                 ComboBox {
                     id: timeLabels
                     objectName: "trendTimeLabels"
@@ -96,25 +96,25 @@ Dialog {
             }
         }
         RowLayout {
-            CheckBox { id: legend; text: "Легенда" }
-            CheckBox { id: legendValues; objectName: "trendLegendValues"; text: "Значения в легенде"; enabled: legend.checked }
-            CheckBox { id: toolbar; text: "Меню периода" }
+            CheckBox { id: legend; text: qsTr("Легенда") }
+            CheckBox { id: legendValues; objectName: "trendLegendValues"; text: qsTr("Значения в легенде"); enabled: legend.checked }
+            CheckBox { id: toolbar; text: qsTr("Меню периода") }
         }
         LabelValue {
             Layout.fillWidth: true
-            text: axes.currentValue === "individual" ? "У каждого ряда цветная ось. Пустые границы означают автоматический диапазон." :
-                  axes.currentValue === "dual" ? "Назначьте каждому ряду левую или правую ось." : "Все ряды используют общую шкалу."
+            text: axes.currentValue === "individual" ? qsTr("У каждого ряда цветная ось. Пустые границы означают автоматический диапазон.") :
+                  axes.currentValue === "dual" ? qsTr("Назначьте каждому ряду левую или правую ось.") : qsTr("Все ряды используют общую шкалу.")
             mode: "muted"
         }
         RowLayout {
             Layout.fillWidth: true
-            LabelValue { text: "Тег"; Layout.fillWidth: true }
-            LabelValue { text: "Цвет"; Layout.preferredWidth: 113 }
-            LabelValue { text: "Линия"; Layout.preferredWidth: 98 }
-            LabelValue { text: "Ось"; visible: axes.currentValue !== "shared"; Layout.preferredWidth: 105 }
-            LabelValue { text: "Минимум"; visible: axes.currentValue === "individual"; Layout.preferredWidth: 76 }
-            LabelValue { text: "Максимум"; visible: axes.currentValue === "individual"; Layout.preferredWidth: 76 }
-            LabelValue { text: "Деления"; visible: axes.currentValue === "individual"; Layout.preferredWidth: 111 }
+            LabelValue { text: qsTr("Тег"); Layout.fillWidth: true }
+            LabelValue { text: qsTr("Цвет"); Layout.preferredWidth: 113 }
+            LabelValue { text: qsTr("Линия"); Layout.preferredWidth: 98 }
+            LabelValue { text: qsTr("Ось"); visible: axes.currentValue !== "shared"; Layout.preferredWidth: 105 }
+            LabelValue { text: qsTr("Минимум"); visible: axes.currentValue === "individual"; Layout.preferredWidth: 76 }
+            LabelValue { text: qsTr("Максимум"); visible: axes.currentValue === "individual"; Layout.preferredWidth: 76 }
+            LabelValue { text: qsTr("Деления"); visible: axes.currentValue === "individual"; Layout.preferredWidth: 111 }
             Item { Layout.preferredWidth: 32 }
         }
         ListView {
@@ -141,7 +141,7 @@ Dialog {
                 ColorField {
                     Layout.preferredWidth: 113
                     text: row.model.tint
-                    caption: "Выбрать цвет ряда"
+                    caption: qsTr("Выбрать цвет ряда")
                     onEdited: value => rows.setProperty(row.index, "tint", value)
                     onChoose: field => {
                         dialog.colorTarget = field
@@ -161,18 +161,18 @@ Dialog {
                     objectName: "trendSide_" + row.index
                     visible: axes.currentValue !== "shared"
                     Layout.preferredWidth: 105
-                    model: ["Левая", "Правая"]
+                    model: [qsTr("Левая"), qsTr("Правая")]
                     currentIndex: row.model.side === "right" ? 1 : 0
                     onActivated: rows.setProperty(row.index, "side", currentIndex === 1 ? "right" : "left")
                 }
                 TextField {
                     visible: axes.currentValue === "individual"; Layout.preferredWidth: 76
-                    placeholderText: "Авто"; text: row.model.low
+                    placeholderText: qsTr("Авто"); text: row.model.low
                     onTextEdited: rows.setProperty(row.index, "low", text)
                 }
                 TextField {
                     visible: axes.currentValue === "individual"; Layout.preferredWidth: 76
-                    placeholderText: "Авто"; text: row.model.high
+                    placeholderText: qsTr("Авто"); text: row.model.high
                     onTextEdited: rows.setProperty(row.index, "high", text)
                 }
                 SpinBox {
@@ -187,7 +187,7 @@ Dialog {
                     Layout.preferredWidth: 32
                     text: "×"
                     objectName: "trendRemoveSeries_" + row.index
-                    ToolTip.visible: hovered; ToolTip.text: "Убрать ряд"
+                    ToolTip.visible: hovered; ToolTip.text: qsTr("Убрать ряд")
                     onClicked: rows.remove(row.index)
                 }
             }
@@ -195,10 +195,10 @@ Dialog {
         }
         RowLayout {
             Layout.fillWidth: true
-            ActionButton { objectName: "trendAddSeries"; text: "+ Ряд"; enabled: rows.count < 32; onClicked: dialog.append({}) }
+            ActionButton { objectName: "trendAddSeries"; text: qsTr("+ Ряд"); enabled: rows.count < 32; onClicked: dialog.append({}) }
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: dialog.close() }
-            ActionButton { objectName: "trendSave"; text: "Применить"; highlighted: true; onClicked: dialog.apply() }
+            ActionButton { text: qsTr("Отмена"); onClicked: dialog.close() }
+            ActionButton { objectName: "trendSave"; text: qsTr("Применить"); highlighted: true; onClicked: dialog.apply() }
         }
     }
 }

@@ -30,7 +30,7 @@ ColumnLayout {
     readonly property real onValue: offValue + (tag.scale ?? 1)
     readonly property bool active: positionKnown && equal(Number(feedbackReading.value),
         (feedbackTag.bias ?? 0) + (feedbackTag.scale ?? 1))
-    readonly property var positions: config.positions || [{ label: "Стоп", value: 0 }, { label: "Ручной", value: 1 }, { label: "Авто", value: 2 }]
+    readonly property var positions: config.positions || [{ label: qsTr("Стоп"), value: 0 }, { label: qsTr("Ручной"), value: 1 }, { label: qsTr("Авто"), value: 2 }]
     property bool editingValue: false
     property string draft: ""
     property bool adjusting: false
@@ -97,15 +97,15 @@ ColumnLayout {
         reportEdit()
     }
     function status() {
-        if (!tag.id) return customActions ? "Тег показания не выбран" : "Выберите тег"
-        if (!known) return "Нет актуальных данных"
+        if (!tag.id) return customActions ? qsTr("Тег показания не выбран") : qsTr("Выберите тег")
+        if (!known) return qsTr("Нет актуальных данных")
         if (binary) {
-            if (!positionKnown) return "Нет обратной связи"
-            const state = config.kind === "valve" ? (active ? "Открыт" : "Закрыт") : (active ? "Включён" : "Выключен")
-            return config.feedback ? "Факт · " + state : state
+            if (!positionKnown) return qsTr("Нет обратной связи")
+            const state = config.kind === "valve" ? (active ? qsTr("Открыт") : qsTr("Закрыт")) : (active ? qsTr("Включён") : qsTr("Выключен"))
+            return config.feedback ? qsTr("Факт · ") + state : state
         }
-        if (analog) return "Текущее · " + format(actual) + units
-        return positions.find(position => matchesActual(position.value))?.label || "Значение · " + String(actual) + units
+        if (analog) return qsTr("Текущее · ") + format(actual) + units
+        return positions.find(position => matchesActual(position.value))?.label || qsTr("Значение · ") + String(actual) + units
     }
     onConfigChanged: {
         editingValue = false
@@ -135,7 +135,7 @@ ColumnLayout {
         color: face.binary && face.active ? face.accent : face.secondary
         font.pixelSize: 12
         ToolTip.visible: statusHover.hovered
-        ToolTip.text: !face.canAdjust ? "Проверьте теги, опрос и разрешение записи" : text
+        ToolTip.text: !face.canAdjust ? qsTr("Проверьте теги, опрос и разрешение записи") : text
         HoverHandler { id: statusHover }
     }
     RowLayout {
@@ -146,7 +146,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.minimumWidth: 0
             compact: true
-            text: face.config.kind === "valve" ? "Закрыть" : "Выкл."
+            text: face.config.kind === "valve" ? qsTr("Закрыть") : qsTr("Выкл.")
             highlighted: face.known && face.equal(face.actual, face.offValue)
             enabled: face.canAdjust
             onOccurred: eventName => face.buttonEvent(eventName, face.offValue)
@@ -156,7 +156,7 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.minimumWidth: 0
             compact: true
-            text: face.config.kind === "valve" ? "Открыть" : "Вкл."
+            text: face.config.kind === "valve" ? qsTr("Открыть") : qsTr("Вкл.")
             highlighted: face.known && face.equal(face.actual, face.onValue)
             enabled: face.canAdjust
             onOccurred: eventName => face.buttonEvent(eventName, face.onValue)
@@ -314,7 +314,7 @@ ColumnLayout {
                 face.submit(face.target)
             }
             ToolTip.visible: hovered && face.editingValue && !face.validDraft
-            ToolTip.text: "Допустимо от " + face.lower + " до " + face.upper
+            ToolTip.text: qsTr("Допустимо от ") + face.lower + qsTr(" до ") + face.upper
         }
         ActionButton {
             visible: face.config.kind === "setpoint" && face.width >= 168
@@ -326,8 +326,8 @@ ColumnLayout {
             id: applyValue
             objectName: "controlApply"
             compact: true
-            text: face.width >= 160 ? "Записать" : "✓"
-            Accessible.name: "Записать уставку"
+            text: face.width >= 160 ? qsTr("Записать") : "✓"
+            Accessible.name: qsTr("Записать уставку")
             highlighted: enabled
             enabled: face.canAdjust && face.editingValue && face.validDraft &&
                 (face.customActions || !face.matchesActual(face.target))

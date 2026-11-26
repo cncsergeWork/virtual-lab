@@ -12,7 +12,7 @@ Dialog {
     readonly property bool writeableTable: tableBox.currentIndex === 0 || tableBox.currentIndex === 3
     modal: true
     width: 580
-    title: entry.id ? "Параметры тега" : "Новый тег"
+    title: entry.id ? qsTr("Параметры тега") : qsTr("Новый тег")
     function edit(item) {
         entry = item || {}
         nameField.text = entry.name || ""
@@ -41,11 +41,11 @@ Dialog {
         spacing: 9
         RowLayout {
             Layout.fillWidth: true
-            Field { id: nameField; objectName: "tagName"; caption: "Имя тега"; Layout.preferredWidth: 270 }
+            Field { id: nameField; objectName: "tagName"; caption: qsTr("Имя тега"); Layout.preferredWidth: 270 }
             ColumnLayout {
                 Layout.preferredWidth: 235
                 Layout.fillWidth: true
-                LabelValue { text: "Источник"; mode: "muted" }
+                LabelValue { text: qsTr("Источник"); mode: "muted" }
                 ComboBox { id: sourceBox; Layout.fillWidth: true; model: form.api.sources; textRole: "name"; valueRole: "id" }
             }
         }
@@ -54,7 +54,7 @@ Dialog {
             Layout.fillWidth: true
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Таблица Modbus"; mode: "muted" }
+                LabelValue { text: qsTr("Таблица Modbus"); mode: "muted" }
                 ComboBox {
                         id: tableBox
                         objectName: "tagModbusTable"
@@ -67,20 +67,20 @@ Dialog {
                 }
             }
             Field { id: unitField; caption: "Unit ID"; Layout.preferredWidth: 75 }
-            Field { id: offsetField; caption: "Адрес с нуля"; Layout.preferredWidth: 100 }
+            Field { id: offsetField; caption: qsTr("Адрес с нуля"); Layout.preferredWidth: 100 }
         }
         RowLayout {
             visible: form.engine
             Layout.fillWidth: true
-            Field { id: jsonPath; objectName: "tagJsonPath"; caption: "Путь JSON"; placeholderText: "values.rpm" }
-            ComboBox { id: jsonType; model: ["Число", "Логический", "Текст"]; Layout.preferredWidth: 160 }
+            Field { id: jsonPath; objectName: "tagJsonPath"; caption: qsTr("Путь JSON"); placeholderText: "values.rpm" }
+            ComboBox { id: jsonType; model: [qsTr("Число"), qsTr("Логический"), qsTr("Текст")]; Layout.preferredWidth: 160 }
         }
         RowLayout {
             Layout.fillWidth: true
             ColumnLayout {
                 visible: !form.engine
                 Layout.fillWidth: true
-                LabelValue { text: "Тип"; mode: "muted" }
+                LabelValue { text: qsTr("Тип"); mode: "muted" }
                 ComboBox {
                     id: typeBox
                     Layout.fillWidth: true
@@ -94,7 +94,7 @@ Dialog {
             ColumnLayout {
                 visible: !form.engine
                 Layout.fillWidth: true
-                LabelValue { text: "Порядок байтов"; mode: "muted" }
+                LabelValue { text: qsTr("Порядок байтов"); mode: "muted" }
                 ComboBox {
                     id: orderBox
                     Layout.fillWidth: true
@@ -102,33 +102,33 @@ Dialog {
                     model: ["ABCD", "BADC", "CDAB", "DCBA"]
                 }
             }
-            Field { id: unitsField; caption: "Ед. измерения"; Layout.preferredWidth: 110 }
+            Field { id: unitsField; caption: qsTr("Ед. измерения"); Layout.preferredWidth: 110 }
         }
         RowLayout {
             Layout.fillWidth: true
             visible: !form.textTag
-            Field { id: scaleField; caption: "Масштаб"; enabled: !form.bits }
-            Field { id: biasField; caption: "Смещение"; enabled: !form.bits }
-            Field { id: archiveField; caption: "Архив, мс · 0 выкл." }
+            Field { id: scaleField; caption: qsTr("Масштаб"); enabled: !form.bits }
+            Field { id: biasField; caption: qsTr("Смещение"); enabled: !form.bits }
+            Field { id: archiveField; caption: qsTr("Архив, мс · 0 выкл.") }
         }
         RowLayout {
             visible: !form.textTag
             Layout.fillWidth: true
             ColumnLayout {
                 Layout.fillWidth: true
-                LabelValue { text: "Тревога"; mode: "muted" }
-                ComboBox { id: alarmBox; Layout.fillWidth: true; model: ["Выключена", "Верхний порог", "Нижний порог"] }
+                LabelValue { text: qsTr("Тревога"); mode: "muted" }
+                ComboBox { id: alarmBox; Layout.fillWidth: true; model: [qsTr("Выключена"), qsTr("Верхний порог"), qsTr("Нижний порог")] }
             }
-            Field { id: limitField; caption: "Порог"; enabled: alarmBox.currentIndex > 0 }
-            Field { id: hysteresisField; caption: "Гистерезис"; enabled: alarmBox.currentIndex > 0 }
+            Field { id: limitField; caption: qsTr("Порог"); enabled: alarmBox.currentIndex > 0 }
+            Field { id: hysteresisField; caption: qsTr("Гистерезис"); enabled: alarmBox.currentIndex > 0 }
         }
-        CheckBox { id: writeBox; objectName: "tagAllowWrite"; visible: !form.engine; enabled: form.writeableTable; text: "Разрешить запись в тег" }
+        CheckBox { id: writeBox; objectName: "tagAllowWrite"; visible: !form.engine; enabled: form.writeableTable; text: qsTr("Разрешить запись в тег") }
         RowLayout {
             Layout.fillWidth: true
             Item { Layout.fillWidth: true }
-            ActionButton { objectName: "tagCancel"; text: "Отмена"; onClicked: form.close() }
+            ActionButton { objectName: "tagCancel"; text: qsTr("Отмена"); onClicked: form.close() }
             ActionButton {
-                text: "Сохранить"
+                text: qsTr("Сохранить")
                 objectName: "tagSave"
                 highlighted: true
                 onClicked: {

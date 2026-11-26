@@ -5,8 +5,8 @@ import QtQuick.Layouts
 RowLayout {
     id: field
     property alias text: entry.text
-    property string hint: "Авто"
-    property string caption: "Выбрать цвет"
+    property string hint: qsTr("Авто")
+    property string caption: qsTr("Выбрать цвет")
     signal choose(var field)
     signal edited(string value)
     spacing: 4

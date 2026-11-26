@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Network WebSockets SerialPort SerialBus Sql Svg)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Gui Qml Quick QuickControls2 Network WebSockets SerialPort SerialBus Sql Svg LinguistTools)
 qt_standard_project_setup(REQUIRES 6.5)
 
 add_library(scada_core STATIC
@@ -23,7 +23,7 @@ if(MSVC)
     target_compile_options(scada_core PUBLIC /utf-8)
 endif()
 
-qt_add_executable(scada WIN32 src/main.cpp)
+qt_add_executable(scada WIN32 src/main.cpp src/interface_language.cpp src/interface_language.h)
 set_target_properties(scada PROPERTIES OUTPUT_NAME "Virtual-Lab")
 if(WIN32)
     enable_language(RC)
@@ -49,11 +49,14 @@ qt_add_resources(scada "studio_qml"
 )
 qt_add_resources(scada_core "project_assets" PREFIX "/"
     FILES engine-tags.json assets/demo-loop.png assets/pump-idle.svg assets/pump-running.svg assets/pump-impeller.svg)
+qt_add_translations(scada TS_FILES translations/virtuallab_uk.ts RESOURCE_PREFIX "/translations"
+    SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src" "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+    LUPDATE_OPTIONS -locations none)
 
 include(CTest)
 if(BUILD_TESTING)
     find_package(Qt6 REQUIRED COMPONENTS Test)
-    target_sources(scada PRIVATE tests/ui_flow.cpp tests/ui_audit.cpp)
+    target_sources(scada PRIVATE tests/ui_flow.cpp tests/ui_audit.cpp tests/ui_language.cpp)
     target_compile_definitions(scada PRIVATE SCADA_UI_TEST)
     target_link_libraries(scada PRIVATE Qt6::Test)
     add_executable(scada_tests tests/core_test.cpp)
@@ -61,6 +64,7 @@ if(BUILD_TESTING)
     add_test(NAME scada_core COMMAND scada_tests -o -,txt)
     add_test(NAME scada_ui COMMAND scada --ui-test)
     add_test(NAME scada_ui_audit COMMAND scada --ui-audit)
+    add_test(NAME scada_ui_language COMMAND scada --ui-language)
     set(ui_test_environment "QT_QPA_PLATFORM=offscreen;QT_QUICK_BACKEND=software;QT_FORCE_STDERR_LOGGING=1")
     if(WIN32 AND NOT DEFINED ENV{QT_QPA_FONTDIR} AND IS_DIRECTORY "$ENV{WINDIR}/Fonts")
         list(APPEND ui_test_environment "QT_QPA_FONTDIR=$ENV{WINDIR}/Fonts")
@@ -68,5 +72,6 @@ if(BUILD_TESTING)
     set_tests_properties(scada_ui scada_ui_audit PROPERTIES
         ENVIRONMENT "${ui_test_environment}"
         RESOURCE_LOCK scada_demo_port TIMEOUT 90)
+    set_tests_properties(scada_ui_language PROPERTIES ENVIRONMENT "${ui_test_environment}" TIMEOUT 20)
     set_tests_properties(scada_core PROPERTIES TIMEOUT 45)
 endif()

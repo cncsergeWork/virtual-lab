@@ -85,34 +85,34 @@ Item {
     }
 
     readonly property var tools: [
-        { kind: "value", title: "Значение", glyph: "12" },
-        { kind: "indicator", title: "Индикатор", glyph: "●" },
-        { kind: "gauge", title: "Шкала", glyph: "▰" },
-        { kind: "trend", title: "Тренд", glyph: "⌁" },
-        { kind: "tank", title: "Бак", glyph: "▥" },
-        { kind: "pump", title: "Насос", glyph: "→" },
-        { kind: "label", title: "Текст", glyph: "T" },
-        { kind: "image", title: "Изображение", glyph: "▧" },
-        { kind: "shape", title: "Фигура", glyph: "◇", onlyType: true },
-        { kind: "hitArea", title: "Зона команды", glyph: "⌖", onlyType: true },
-        { kind: "command", title: "Команда", glyph: "↯" },
-        { kind: "link", title: "Переход", glyph: "↗" },
-        { kind: "dial", title: "Стрелочный прибор", glyph: "◴" },
-        { kind: "column", title: "Термометр", glyph: "▕" },
-        { kind: "ring", title: "Сегментная шкала", glyph: "◉" },
-        { kind: "segments", title: "Цифровое табло", glyph: "88" },
-        { kind: "signal", title: "Сигнальная лампа", glyph: "◈" },
-        { kind: "compass", title: "Компас", glyph: "◇" },
-        { kind: "switch", title: "Тумблер", glyph: "◉", section: "Управление" },
-        { kind: "setpoint", title: "Ввод уставки", glyph: "±" },
-        { kind: "slider", title: "Ползунок", glyph: "↔" },
-        { kind: "knob", title: "Регулятор", glyph: "◴" },
-        { kind: "selector", title: "Выбор режима", glyph: "≡" },
-        { kind: "valve", title: "Клапан", glyph: "⋈", section: "Мнемосхема" },
-        { kind: "motor", title: "Двигатель", glyph: "Ⓜ" },
-        { kind: "pipe", title: "Трубопровод", glyph: "━" },
-        { kind: "bargraph", title: "Линейный прибор", glyph: "▤" },
-        { kind: "alarm", title: "Тревога", glyph: "!" }
+        { kind: "value", title: qsTr("Значение"), glyph: "12" },
+        { kind: "indicator", title: qsTr("Индикатор"), glyph: "●" },
+        { kind: "gauge", title: qsTr("Шкала"), glyph: "▰" },
+        { kind: "trend", title: qsTr("Тренд"), glyph: "⌁" },
+        { kind: "tank", title: qsTr("Бак"), glyph: "▥" },
+        { kind: "pump", title: qsTr("Насос"), glyph: "→" },
+        { kind: "label", title: qsTr("Текст"), glyph: "T" },
+        { kind: "image", title: qsTr("Изображение"), glyph: "▧" },
+        { kind: "shape", title: qsTr("Фигура"), glyph: "◇", onlyType: true },
+        { kind: "hitArea", title: qsTr("Зона команды"), glyph: "⌖", onlyType: true },
+        { kind: "command", title: qsTr("Команда"), glyph: "↯" },
+        { kind: "link", title: qsTr("Переход"), glyph: "↗" },
+        { kind: "dial", title: qsTr("Стрелочный прибор"), glyph: "◴" },
+        { kind: "column", title: qsTr("Термометр"), glyph: "▕" },
+        { kind: "ring", title: qsTr("Сегментная шкала"), glyph: "◉" },
+        { kind: "segments", title: qsTr("Цифровое табло"), glyph: "88" },
+        { kind: "signal", title: qsTr("Сигнальная лампа"), glyph: "◈" },
+        { kind: "compass", title: qsTr("Компас"), glyph: "◇" },
+        { kind: "switch", title: qsTr("Тумблер"), glyph: "◉", section: qsTr("Управление") },
+        { kind: "setpoint", title: qsTr("Ввод уставки"), glyph: "±" },
+        { kind: "slider", title: qsTr("Ползунок"), glyph: "↔" },
+        { kind: "knob", title: qsTr("Регулятор"), glyph: "◴" },
+        { kind: "selector", title: qsTr("Выбор режима"), glyph: "≡" },
+        { kind: "valve", title: qsTr("Клапан"), glyph: "⋈", section: qsTr("Мнемосхема") },
+        { kind: "motor", title: qsTr("Двигатель"), glyph: "Ⓜ" },
+        { kind: "pipe", title: qsTr("Трубопровод"), glyph: "━" },
+        { kind: "bargraph", title: qsTr("Линейный прибор"), glyph: "▤" },
+        { kind: "alarm", title: qsTr("Тревога"), glyph: "!" }
     ].filter(tool => dashboard.typeEditor || !tool.onlyType)
     function onGrid(value) { return snap ? Math.round(value / gridStep) * gridStep : Math.round(value) }
     function revealScreen() {
@@ -185,14 +185,14 @@ Item {
                 visible: dashboard.editing && !dashboard.typeEditor
                 compact: true
                 text: "+"
-                Accessible.name: "Добавить экран"
+                Accessible.name: qsTr("Добавить экран")
                 ToolTip.visible: hovered; ToolTip.text: Accessible.name
                 onClicked: dashboard.nameRequested("", "")
             }
             ActionButton {
                 visible: dashboard.editing && !dashboard.typeEditor
                 compact: true
-                text: "Экран ▾"
+                text: qsTr("Экран ▾")
                 objectName: "screenMenu"
                 onClicked: screenMenu.open()
                 Menu {
@@ -200,12 +200,12 @@ Item {
                     y: parent.height
                     MenuItem {
                         objectName: "openScreenProperties"
-                        text: "Свойства экрана…"
+                        text: qsTr("Свойства экрана…")
                         onTriggered: dashboard.screenPropertiesRequested(dashboard.selectedScreen)
                     }
                     MenuItem {
                         objectName: "deleteScreen"
-                        text: "Удалить…"
+                        text: qsTr("Удалить…")
                         enabled: dashboard.api.screens.length > 1
                         onTriggered: dashboard.deleteScreenRequested()
                     }
@@ -215,7 +215,7 @@ Item {
                 objectName: "faceplateBack"
                 visible: dashboard.typeEditor
                 compact: true
-                text: "← На экран"
+                text: qsTr("← На экран")
                 onClicked: dashboard.api.leaveComposite()
             }
             LabelValue {
@@ -229,14 +229,14 @@ Item {
                 objectName: "faceplatePorts"
                 visible: dashboard.typeEditor
                 compact: true
-                text: "Интерфейс тегов…"
+                text: qsTr("Интерфейс тегов…")
                 onClicked: faceplatePorts.edit(dashboard.api.faceplates.find(type => type.id === dashboard.canvasSettings.id))
             }
             ActionButton {
                 objectName: "faceplateSize"
                 visible: dashboard.typeEditor
                 compact: true
-                text: "Размер типа…"
+                text: qsTr("Размер типа…")
                 onClicked: {
                     typeWidth.text = String(dashboard.canvasSettings.width)
                     typeHeight.text = String(dashboard.canvasSettings.height)
@@ -247,25 +247,25 @@ Item {
                 objectName: "faceplatePropertyInterface"
                 visible: dashboard.typeEditor
                 compact: true
-                text: "Интерфейс свойств…"
+                text: qsTr("Интерфейс свойств…")
                 onClicked: faceplateProperties.edit(dashboard.api.faceplates.find(type => type.id === dashboard.canvasSettings.id))
             }
             ActionButton {
                 objectName: "faceplatePreview"
                 visible: dashboard.typeEditor
                 compact: true
-                text: "Предпросмотр"
+                text: qsTr("Предпросмотр")
                 onClicked: widgetPreview.start()
             }
             ActionButton {
                 objectName: "togglePalette"
                 visible: dashboard.editing
                 compact: true
-                text: "Палитра"
+                text: qsTr("Палитра")
                 checkable: true
                 checked: !dashboard.paletteCollapsed
                 highlighted: checked
-                Accessible.name: checked ? "Свернуть левую панель" : "Развернуть левую панель"
+                Accessible.name: checked ? qsTr("Свернуть левую панель") : qsTr("Развернуть левую панель")
                 ToolTip.visible: hovered
                 ToolTip.text: Accessible.name
                 onToggled: {
@@ -277,11 +277,11 @@ Item {
                 objectName: "toggleInspector"
                 visible: dashboard.editing
                 compact: true
-                text: "Свойства"
+                text: qsTr("Свойства")
                 checkable: true
                 checked: !dashboard.inspectorCollapsed
                 highlighted: checked
-                Accessible.name: checked ? "Свернуть панель свойств" : "Развернуть панель свойств"
+                Accessible.name: checked ? qsTr("Свернуть панель свойств") : qsTr("Развернуть панель свойств")
                 ToolTip.visible: hovered
                 ToolTip.text: Accessible.name
                 onToggled: {
@@ -289,8 +289,8 @@ Item {
                     dashboard.saveEditorSetting("inspectorCollapsed", dashboard.inspectorCollapsed)
                 }
             }
-            ActionButton { objectName: "editorUndo"; visible: dashboard.editing; compact: true; text: "↶"; enabled: dashboard.api.canUndo; onClicked: dashboard.api.undo(); ToolTip.visible: hovered; ToolTip.text: "Отменить" }
-            ActionButton { objectName: "editorRedo"; visible: dashboard.editing; compact: true; text: "↷"; enabled: dashboard.api.canRedo; onClicked: dashboard.api.redo(); ToolTip.visible: hovered; ToolTip.text: "Повторить" }
+            ActionButton { objectName: "editorUndo"; visible: dashboard.editing; compact: true; text: "↶"; enabled: dashboard.api.canUndo; onClicked: dashboard.api.undo(); ToolTip.visible: hovered; ToolTip.text: qsTr("Отменить") }
+            ActionButton { objectName: "editorRedo"; visible: dashboard.editing; compact: true; text: "↷"; enabled: dashboard.api.canRedo; onClicked: dashboard.api.redo(); ToolTip.visible: hovered; ToolTip.text: qsTr("Повторить") }
         }
         RowLayout {
             id: editorRow
@@ -322,13 +322,13 @@ Item {
                         spacing: 5
                         LabelValue {
                             visible: !dashboard.typeEditor
-                            text: "Свои виджеты"; mode: "strong"; font.pixelSize: 15
+                            text: qsTr("Свои виджеты"); mode: "strong"; font.pixelSize: 15
                         }
                         ActionButton {
                             objectName: "faceplateLibraryNew"
                             visible: !dashboard.typeEditor
                             Layout.fillWidth: true
-                            text: "Создать виджет…"
+                            text: qsTr("Создать виджет…")
                             compact: true
                             onClicked: libraryNameDialog.edit("", "")
                         }
@@ -336,7 +336,7 @@ Item {
                             objectName: "faceplateLibraryImport"
                             visible: !dashboard.typeEditor
                             Layout.fillWidth: true
-                            text: "Импорт…"
+                            text: qsTr("Импорт…")
                             compact: true
                             onClicked: faceplateImportPicker.open()
                         }
@@ -367,30 +367,30 @@ Item {
                                     spacing: 5
                                     ActionButton {
                                         objectName: "faceplateDuplicate_" + typeOption.model.id
-                                        text: "Дублировать"
+                                        text: qsTr("Дублировать")
                                         compact: true
-                                        Accessible.name: "Дублировать " + typeOption.text
+                                        Accessible.name: qsTr("Дублировать ") + typeOption.text
                                         onClicked: libraryNameDialog.duplicate(typeOption.model.id)
                                     }
                                     ActionButton {
                                         objectName: "faceplateRename_" + typeOption.model.id
-                                        text: "Переименовать"
+                                        text: qsTr("Переименовать")
                                         compact: true
-                                        Accessible.name: "Переименовать " + typeOption.text
+                                        Accessible.name: qsTr("Переименовать ") + typeOption.text
                                         onClicked: libraryNameDialog.edit(typeOption.model.id, typeOption.text)
                                     }
                                     ActionButton {
                                         objectName: "faceplateExport_" + typeOption.model.id
-                                        text: "Экспорт…"
+                                        text: qsTr("Экспорт…")
                                         compact: true
-                                        Accessible.name: "Сохранить тип «" + typeOption.text + "» в файл"
+                                        Accessible.name: qsTr("Сохранить тип «") + typeOption.text + qsTr("» в файл")
                                         onClicked: faceplateExportPicker.exportType(typeOption.model.id)
                                     }
                                     ActionButton {
                                         objectName: "faceplateDelete_" + typeOption.model.id
-                                        text: "Удалить"
+                                        text: qsTr("Удалить")
                                         compact: true
-                                        Accessible.name: "Удалить " + typeOption.text
+                                        Accessible.name: qsTr("Удалить ") + typeOption.text
                                         onClicked: libraryDeleteDialog.ask(typeOption.model.id, typeOption.text)
                                     }
                                 }
@@ -401,14 +401,14 @@ Item {
                             Layout.fillWidth: true
                             ActionButton {
                                 objectName: "faceplateLibraryInsert"
-                                text: "Вставить"; compact: true
+                                text: qsTr("Вставить"); compact: true
                                 highlighted: true; Layout.fillWidth: true
                                 enabled: !!faceplateBox.currentValue
                                 onClicked: dashboard.api.insertFaceplate(faceplateBox.currentValue)
                             }
                             ActionButton {
                                 objectName: "faceplateLibraryEdit"
-                                text: "Правка"; compact: true
+                                text: qsTr("Правка"); compact: true
                                 enabled: !!faceplateBox.currentValue
                                 onClicked: dashboard.api.enterComposite(faceplateBox.currentValue)
                             }
@@ -418,7 +418,7 @@ Item {
                             api: dashboard.api
                             Layout.fillWidth: true
                         }
-                        LabelValue { text: "Элементы"; mode: "strong"; font.pixelSize: 15; Layout.bottomMargin: 5 }
+                        LabelValue { text: qsTr("Элементы"); mode: "strong"; font.pixelSize: 15; Layout.bottomMargin: 5 }
                         Repeater {
                             model: dashboard.tools
                             delegate: ColumnLayout {
@@ -483,7 +483,7 @@ Item {
                         }
                         LabelValue {
                             visible: dashboard.api.templates.length > 0
-                            text: "Шаблоны"; mode: "strong"; Layout.topMargin: 7
+                            text: qsTr("Шаблоны"); mode: "strong"; Layout.topMargin: 7
                         }
                         ComboBox {
                             id: templateBox
@@ -497,13 +497,13 @@ Item {
                             Layout.fillWidth: true
                             ActionButton {
                                 objectName: "insertTemplate"
-                                text: "Вставить"; Layout.fillWidth: true; highlighted: true
+                                text: qsTr("Вставить"); Layout.fillWidth: true; highlighted: true
                                 onClicked: dashboard.api.insertTemplate(templateBox.currentValue)
                             }
                             ActionButton {
                                 objectName: "removeTemplate"
                                 text: "×"; onClicked: dashboard.api.removeTemplate(templateBox.currentValue)
-                                ToolTip.visible: hovered; ToolTip.text: "Удалить шаблон"
+                                ToolTip.visible: hovered; ToolTip.text: qsTr("Удалить шаблон")
                             }
                         }
                     }
@@ -538,13 +538,13 @@ Item {
                                 implicitHeight: 30
                                 topPadding: 2; bottomPadding: 2
                                 objectName: "editorSnap"
-                                text: "Привязка к сетке"; checked: dashboard.snap
+                                text: qsTr("Привязка к сетке"); checked: dashboard.snap
                                 onToggled: dashboard.snap = checked
                             }
                             ActionButton {
                                 compact: true
                                 objectName: "editorFit"
-                                text: "Вписать"; highlighted: dashboard.fit
+                                text: qsTr("Вписать"); highlighted: dashboard.fit
                                 onClicked: { dashboard.fit = true; view.contentX = 0; view.contentY = 0 }
                             }
                             ActionButton { objectName: "editorZoomOut"; compact: true; text: "−"; onClicked: { dashboard.zoom = Math.max(0.025, canvasBoard.factor / 1.2); dashboard.fit = false } }
@@ -627,7 +627,7 @@ Item {
                             Label {
                                 anchors.centerIn: parent
                                 visible: dashboard.api.items.length === 0
-                                text: dashboard.editing ? "Перетащите элемент на экран" : "Этот экран пока пуст"
+                                text: dashboard.editing ? qsTr("Перетащите элемент на экран") : qsTr("Этот экран пока пуст")
                                 color: canvasBoard.darkBackground ? "#cbddeb" : "#607486"; font.pixelSize: 23
                             }
                             Repeater {
@@ -674,9 +674,9 @@ Item {
     FileDialog {
         id: faceplateExportPicker
         objectName: "faceplateExportPicker"
-        title: "Сохранить тип фейсплейса в файл"
+        title: qsTr("Сохранить тип фейсплейса в файл")
         fileMode: FileDialog.SaveFile
-        nameFilters: ["Тип фейсплейса (*.faceplate.json)"]
+        nameFilters: [qsTr("Тип фейсплейса (*.faceplate.json)")]
         defaultSuffix: "faceplate.json"
         property string typeId: ""
         function exportType(id) {
@@ -689,8 +689,8 @@ Item {
     FileDialog {
         id: faceplateImportPicker
         objectName: "faceplateImportPicker"
-        title: "Импортировать тип фейсплейса"
-        nameFilters: ["Тип фейсплейса (*.faceplate.json)"]
+        title: qsTr("Импортировать тип фейсплейса")
+        nameFilters: [qsTr("Тип фейсплейса (*.faceplate.json)")]
         onAccepted: {
             const file = selectedFile
             Qt.callLater(() => faceplateImportDialog.edit(file))
@@ -699,7 +699,7 @@ Item {
     Dialog {
         id: faceplateImportDialog
         objectName: "faceplateImportOptionsDialog"
-        title: "Импорт типа фейсплейса"
+        title: qsTr("Импорт типа фейсплейса")
         parent: Overlay.overlay
         anchors.centerIn: parent
         modal: true
@@ -758,17 +758,17 @@ Item {
         }
         contentItem: ColumnLayout {
             spacing: 7
-            LabelValue { text: "Тип в файле · " + faceplateImportDialog.sourceName; Layout.fillWidth: true }
+            LabelValue { text: qsTr("Тип в файле · ") + faceplateImportDialog.sourceName; Layout.fillWidth: true }
             RadioButton {
                 id: newMode
                 objectName: "faceplateImportNewMode"
-                text: "Создать новый тип"
+                text: qsTr("Создать новый тип")
                 checked: true
             }
             TextField {
                 id: importName
                 objectName: "faceplateImportName"
-                placeholderText: "Название нового типа"
+                placeholderText: qsTr("Название нового типа")
                 Accessible.name: placeholderText
                 visible: newMode.checked
                 Layout.fillWidth: true
@@ -778,17 +778,17 @@ Item {
             RadioButton {
                 id: replaceMode
                 objectName: "faceplateImportReplaceMode"
-                text: "Заменить существующий тип"
+                text: qsTr("Заменить существующий тип")
                 enabled: dashboard.api.faceplates.length > 0
                 onCheckedChanged: faceplateImportDialog.refreshMapping()
             }
             ComboBox {
                 id: importTarget
                 objectName: "faceplateImportTarget"
-                Accessible.name: "Тип для замены"
+                Accessible.name: qsTr("Тип для замены")
                 visible: replaceMode.checked
                 Layout.fillWidth: true
-                model: [{ id: "", name: "Выберите тип для замены" }].concat(dashboard.api.faceplates)
+                model: [{ id: "", name: qsTr("Выберите тип для замены") }].concat(dashboard.api.faceplates)
                 textRole: "name"
                 valueRole: "id"
                 onCurrentValueChanged: faceplateImportDialog.refreshMapping()
@@ -798,12 +798,12 @@ Item {
                 Layout.fillWidth: true
                 wrapMode: Text.Wrap
                 color: "#506479"
-                text: "Замена обновит тип на всех экранах и в шаблонах."
+                text: qsTr("Замена обновит тип на всех экранах и в шаблонах.")
             }
             FaceplateFieldMapping {
                 id: importMapping
                 choicePrefix: "faceplateImportMap_"
-                destinationHeading: "Поле из файла"
+                destinationHeading: qsTr("Поле из файла")
                 Layout.fillWidth: true
                 onEdited: faceplateImportDialog.errorText = ""
             }
@@ -819,10 +819,10 @@ Item {
             RowLayout {
                 Layout.fillWidth: true
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: faceplateImportDialog.close() }
+                ActionButton { text: qsTr("Отмена"); onClicked: faceplateImportDialog.close() }
                 ActionButton {
                     objectName: "faceplateImportApply"
-                    text: replaceMode.checked ? "Заменить" : "Импортировать"
+                    text: replaceMode.checked ? qsTr("Заменить") : qsTr("Импортировать")
                     enabled: faceplateImportDialog.canApply
                     highlighted: true
                     onClicked: faceplateImportDialog.applyImport()
@@ -832,22 +832,22 @@ Item {
     }
     Dialog {
         id: faceplateSize
-        title: "Размер типа"
+        title: qsTr("Размер типа")
         parent: Overlay.overlay
         anchors.centerIn: parent
         modal: true
         width: 360
         contentItem: ColumnLayout {
             RowLayout {
-                Field { id: typeWidth; objectName: "typeWidth"; caption: "Ширина, px" }
-                Field { id: typeHeight; objectName: "typeHeight"; caption: "Высота, px" }
+                Field { id: typeWidth; objectName: "typeWidth"; caption: qsTr("Ширина, px") }
+                Field { id: typeHeight; objectName: "typeHeight"; caption: qsTr("Высота, px") }
             }
             RowLayout {
                 Item { Layout.fillWidth: true }
-                ActionButton { text: "Отмена"; onClicked: faceplateSize.close() }
+                ActionButton { text: qsTr("Отмена"); onClicked: faceplateSize.close() }
                 ActionButton {
                     objectName: "typeSizeApply"
-                    text: "Применить"; highlighted: true
+                    text: qsTr("Применить"); highlighted: true
                     enabled: /^[0-9]+$/.test(typeWidth.text.trim()) && /^[0-9]+$/.test(typeHeight.text.trim()) &&
                         Number(typeWidth.text) >= 80 && Number(typeWidth.text) <= 8192 &&
                         Number(typeHeight.text) >= 52 && Number(typeHeight.text) <= 8192
@@ -860,7 +860,7 @@ Item {
         id: libraryNameDialog
         property string typeId: ""
         property bool copying: false
-        title: copying ? "Создать копию типа" : typeId ? "Переименовать тип фейсплейса" : "Создать свой виджет"
+        title: copying ? qsTr("Создать копию типа") : typeId ? qsTr("Переименовать тип фейсплейса") : qsTr("Создать свой виджет")
         parent: Overlay.overlay
         anchors.centerIn: parent
         modal: true
@@ -905,11 +905,11 @@ Item {
             }
         }
         contentItem: ColumnLayout {
-            LabelValue { text: "Название типа"; mode: "muted" }
+            LabelValue { text: qsTr("Название типа"); mode: "muted" }
             TextField {
                 id: libraryName
                 objectName: "faceplateLibraryName"
-                Accessible.name: "Название типа"
+                Accessible.name: qsTr("Название типа")
                 Layout.fillWidth: true
                 implicitHeight: 36
                 selectByMouse: true
@@ -920,14 +920,14 @@ Item {
                 Field {
                     id: newWidgetWidth
                     objectName: "newWidgetWidth"
-                    caption: "Ширина, px"
+                    caption: qsTr("Ширина, px")
                     validator: IntValidator { bottom: 80; top: 8192 }
                     onAccepted: libraryNameDialog.save()
                 }
                 Field {
                     id: newWidgetHeight
                     objectName: "newWidgetHeight"
-                    caption: "Высота, px"
+                    caption: qsTr("Высота, px")
                     validator: IntValidator { bottom: 52; top: 8192 }
                     onAccepted: libraryNameDialog.save()
                 }
@@ -936,12 +936,12 @@ Item {
                 Item { Layout.fillWidth: true }
                 ActionButton {
                     objectName: "faceplateLibraryNameCancel"
-                    text: "Отмена"
+                    text: qsTr("Отмена")
                     onClicked: libraryNameDialog.close()
                 }
                 ActionButton {
                     objectName: "faceplateLibraryNameApply"
-                    text: libraryNameDialog.copying ? "Создать копию" : libraryNameDialog.typeId ? "Сохранить" : "Создать"
+                    text: libraryNameDialog.copying ? qsTr("Создать копию") : libraryNameDialog.typeId ? qsTr("Сохранить") : qsTr("Создать")
                     enabled: libraryName.text.trim() !== "" && (!!libraryNameDialog.typeId ||
                         newWidgetWidth.acceptableInput && newWidgetHeight.acceptableInput)
                     highlighted: true
@@ -954,7 +954,7 @@ Item {
         id: libraryDeleteDialog
         property string typeId: ""
         property string typeName: ""
-        title: "Удаление типа фейсплейса"
+        title: qsTr("Удаление типа фейсплейса")
         parent: Overlay.overlay
         anchors.centerIn: parent
         modal: true
@@ -974,7 +974,7 @@ Item {
         }
         contentItem: ColumnLayout {
             Label {
-                text: "Удалить тип «" + libraryDeleteDialog.typeName + "»?"
+                text: qsTr("Удалить тип «") + libraryDeleteDialog.typeName + "»?"
                 wrapMode: Text.Wrap
                 Layout.fillWidth: true
             }
@@ -982,12 +982,12 @@ Item {
                 Item { Layout.fillWidth: true }
                 ActionButton {
                     objectName: "faceplateDeleteCancel"
-                    text: "Отмена"
+                    text: qsTr("Отмена")
                     onClicked: libraryDeleteDialog.close()
                 }
                 ActionButton {
                     objectName: "faceplateDeleteConfirm"
-                    text: "Удалить"
+                    text: qsTr("Удалить")
                     highlighted: true
                     onClicked: libraryDeleteDialog.remove()
                 }

@@ -10,10 +10,10 @@ ColumnLayout {
     readonly property var layers: api.items.slice().reverse()
     readonly property int selected: layers.findIndex(layer => layer.id === api.selectedId)
 
-    LabelValue { text: "Слои"; mode: "strong"; font.pixelSize: 15 }
+    LabelValue { text: qsTr("Слои"); mode: "strong"; font.pixelSize: 15 }
     LabelValue {
         visible: panel.layers.length === 0
-        text: "Добавьте элемент"
+        text: qsTr("Добавьте элемент")
         mode: "muted"
     }
     ListView {
@@ -30,11 +30,11 @@ ColumnLayout {
             width: ListView.view.width
             height: 31
             compact: true
-            text: (modelData.locked ? "▣ " : "") + (modelData.title || "Слой")
+            text: (modelData.locked ? "▣ " : "") + (modelData.title || qsTr("Слой"))
             highlighted: panel.api.selectedIds.includes(modelData.id)
             onClicked: panel.api.selectWidget(modelData.id)
             ToolTip.visible: hovered
-            ToolTip.text: modelData.title || "Слой"
+            ToolTip.text: modelData.title || qsTr("Слой")
         }
         ScrollBar.vertical: ScrollBar {}
     }
@@ -47,7 +47,7 @@ ColumnLayout {
             compact: true
             text: "↑"
             enabled: panel.selected > 0
-            Accessible.name: "Поднять слой"
+            Accessible.name: qsTr("Поднять слой")
             ToolTip.visible: hovered
             ToolTip.text: Accessible.name
             onClicked: panel.api.moveLayer(1)
@@ -57,7 +57,7 @@ ColumnLayout {
             compact: true
             text: "↓"
             enabled: panel.selected >= 0 && panel.selected < panel.layers.length - 1
-            Accessible.name: "Опустить слой"
+            Accessible.name: qsTr("Опустить слой")
             ToolTip.visible: hovered
             ToolTip.text: Accessible.name
             onClicked: panel.api.moveLayer(-1)
@@ -68,7 +68,7 @@ ColumnLayout {
             Layout.fillWidth: true
             text: panel.api.widget.locked ? "▣" : "□"
             enabled: panel.selected >= 0
-            Accessible.name: panel.api.widget.locked ? "Разблокировать слой" : "Заморозить положение"
+            Accessible.name: panel.api.widget.locked ? qsTr("Разблокировать слой") : qsTr("Заморозить положение")
             ToolTip.visible: hovered
             ToolTip.text: Accessible.name
             onClicked: panel.api.configureWidget({ locked: !panel.api.widget.locked })

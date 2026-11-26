@@ -34,5 +34,15 @@ if ($Deploy) {
     Invoke-BuildTool (Join-Path $QtRoot 'bin\windeployqt.exe') @('--release', '--no-translations', '--verbose', '0',
         '--include-plugins', 'qoffscreen,qsvg',
         '--qmldir', (Join-Path $root 'qml'), $deployedExecutable)
+    $deployedTranslations = Join-Path $destination 'translations'
+    New-Item -ItemType Directory -Force -Path $deployedTranslations | Out-Null
+    foreach ($module in @('qtbase', 'qtdeclarative', 'qtserialport', 'qtwebsockets')) {
+        foreach ($language in @('ru', 'uk')) {
+            $catalogPath = Join-Path $QtRoot "translations\${module}_$language.qm"
+            if (Test-Path -LiteralPath $catalogPath) {
+                Copy-Item -LiteralPath $catalogPath -Destination $deployedTranslations -Force
+            }
+        }
+    }
     Write-Output $deployedExecutable
 }

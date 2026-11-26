@@ -13,17 +13,17 @@ Dialog {
     property string error: ""
     readonly property bool analog: ["setpoint", "slider", "knob"].includes(kind)
     readonly property var events: [
-        { id: "press", name: "Нажал" },
-        { id: "release", name: "Отпустил" },
-        { id: "click", name: analog ? "Записал значение" : "Щёлкнул" }
-    ].concat(analog ? [{ id: "change", name: "Изменил значение" }] : [])
-    readonly property var operations: [{ id: "write", name: "Записать" }, { id: "read", name: "Прочитать" }]
+        { id: "press", name: qsTr("Нажал") },
+        { id: "release", name: qsTr("Отпустил") },
+        { id: "click", name: analog ? qsTr("Записал значение") : qsTr("Щёлкнул") }
+    ].concat(analog ? [{ id: "change", name: qsTr("Изменил значение") }] : [])
+    readonly property var operations: [{ id: "write", name: qsTr("Записать") }, { id: "read", name: qsTr("Прочитать") }]
     readonly property var modes: [
-        { id: "constant", name: "Заданное число" },
-        { id: "widget", name: "Из виджета" },
-        { id: "tag", name: "Из другого тега" }
+        { id: "constant", name: qsTr("Заданное число") },
+        { id: "widget", name: qsTr("Из виджета") },
+        { id: "tag", name: qsTr("Из другого тега") }
     ]
-    readonly property var unboundTag: ({ id: "", name: "Без привязки" })
+    readonly property var unboundTag: ({ id: "", name: qsTr("Без привязки") })
     readonly property var readTags: [unboundTag].concat(api.editorTags.filter(tag =>
         tag.interfacePort ? tag.address?.type !== "text" :
             api.sources.some(source => source.id === tag.source && source.driver === "modbus-tcp")))
@@ -31,10 +31,10 @@ Dialog {
     readonly property var valueTags: [unboundTag].concat(numericTags)
     readonly property var writeTags: [unboundTag].concat(numericTags.map(tag => ({
         id: tag.id,
-        name: tag.name + (tag.writable ? "" : " · только чтение")
+        name: tag.name + (tag.writable ? "" : qsTr(" · только чтение"))
     })))
 
-    title: "События и действия"
+    title: qsTr("События и действия")
     parent: Overlay.overlay
     anchors.centerIn: parent
     modal: true
@@ -84,7 +84,7 @@ Dialog {
                     const number = row.numberText.trim().replace(",", ".")
                     const value = Number(number)
                     if (!number || !Number.isFinite(value) || Math.abs(value) > 1e100) {
-                        error = "Введите число для записи в строке " + (i + 1) + "."
+                        error = qsTr("Введите число для записи в строке ") + (i + 1) + "."
                         return
                     }
                     entry.value = value
@@ -103,26 +103,26 @@ Dialog {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             text: dialog.kind === "slider" || dialog.kind === "knob" ?
-                "Нажатие и отпускание относятся к самому регулятору. «Записал значение» относится к кнопке «Записать»." :
+                qsTr("Нажатие и отпускание относятся к самому регулятору. «Записал значение» относится к кнопке «Записать».") :
                 dialog.kind === "setpoint" ?
-                    "Нажатие, отпускание и запись относятся к кнопке «Записать». «Изменил значение» относится к полю ввода и кнопкам ±." :
-                    "«Щёлкнул» срабатывает после нажатия и отпускания кнопки."
+                    qsTr("Нажатие, отпускание и запись относятся к кнопке «Записать». «Изменил значение» относится к полю ввода и кнопкам ±.") :
+                    qsTr("«Щёлкнул» срабатывает после нажатия и отпускания кнопки.")
             color: "#526579"
         }
         RowLayout {
             Layout.fillWidth: true
             visible: rows.count > 0
-            LabelValue { text: "Событие"; Layout.preferredWidth: 174 }
-            LabelValue { text: "Действие"; Layout.preferredWidth: 112 }
-            LabelValue { text: "Тег действия"; Layout.fillWidth: true }
-            LabelValue { text: "Значение"; Layout.preferredWidth: 143 }
-            LabelValue { text: "Число или тег-источник"; Layout.preferredWidth: 158 }
+            LabelValue { text: qsTr("Событие"); Layout.preferredWidth: 174 }
+            LabelValue { text: qsTr("Действие"); Layout.preferredWidth: 112 }
+            LabelValue { text: qsTr("Тег действия"); Layout.fillWidth: true }
+            LabelValue { text: qsTr("Значение"); Layout.preferredWidth: 143 }
+            LabelValue { text: qsTr("Число или тег-источник"); Layout.preferredWidth: 158 }
             Item { Layout.preferredWidth: 103 }
         }
         LabelValue {
             Layout.fillWidth: true
             visible: rows.count === 0
-            text: "Виджет использует встроенное действие. Добавьте строку, чтобы настроить своё."
+            text: qsTr("Виджет использует встроенное действие. Добавьте строку, чтобы настроить своё.")
             mode: "muted"
         }
         ListView {
@@ -169,7 +169,7 @@ Dialog {
                 ComboBox {
                     objectName: "widgetActionTag_" + row.index
                     Layout.fillWidth: true
-                    Accessible.name: "Тег действия"
+                    Accessible.name: qsTr("Тег действия")
                     model: row.tagChoices
                     textRole: "name"
                     valueRole: "id"
@@ -186,7 +186,7 @@ Dialog {
                         objectName: "widgetActionValueMode_" + row.index
                         anchors.fill: parent
                         visible: row.model.actionId === "write"
-                        Accessible.name: "Источник записываемого значения"
+                        Accessible.name: qsTr("Источник записываемого значения")
                         model: dialog.modes
                         textRole: "name"
                         valueRole: "id"
@@ -209,7 +209,7 @@ Dialog {
                         objectName: "widgetActionSourceTag_" + row.index
                         anchors.fill: parent
                         visible: row.model.actionId === "write" && row.model.modeId === "tag"
-                        Accessible.name: "Тег-источник значения"
+                        Accessible.name: qsTr("Тег-источник значения")
                         model: dialog.valueTags
                         textRole: "name"
                         valueRole: "id"
@@ -225,7 +225,7 @@ Dialog {
                     text: "↑"
                     compact: true
                     enabled: row.index > 0
-                    Accessible.name: "Переместить выше"
+                    Accessible.name: qsTr("Переместить выше")
                     onClicked: rows.move(row.index, row.index - 1, 1)
                 }
                 ActionButton {
@@ -233,14 +233,14 @@ Dialog {
                     text: "↓"
                     compact: true
                     enabled: row.index + 1 < rows.count
-                    Accessible.name: "Переместить ниже"
+                    Accessible.name: qsTr("Переместить ниже")
                     onClicked: rows.move(row.index, row.index + 1, 1)
                 }
                 ActionButton {
                     objectName: "widgetActionRemove_" + row.index
                     text: "×"
                     compact: true
-                    Accessible.name: "Удалить действие"
+                    Accessible.name: qsTr("Удалить действие")
                     onClicked: rows.remove(row.index)
                 }
             }
@@ -255,15 +255,15 @@ Dialog {
             Layout.fillWidth: true
             ActionButton {
                 objectName: "widgetActionAdd"
-                text: "+ Действие"
+                text: qsTr("+ Действие")
                 enabled: rows.count < 32
                 onClicked: dialog.addRow()
             }
             Item { Layout.fillWidth: true }
-            ActionButton { text: "Отмена"; onClicked: dialog.close() }
+            ActionButton { text: qsTr("Отмена"); onClicked: dialog.close() }
             ActionButton {
                 objectName: "widgetActionApply"
-                text: "Применить"
+                text: qsTr("Применить")
                 highlighted: true
                 onClicked: dialog.apply()
             }

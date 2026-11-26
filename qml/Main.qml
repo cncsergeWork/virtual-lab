@@ -21,7 +21,7 @@ ApplicationWindow {
     property bool operatorFullscreen: false
     property int pageBeforeFullscreen: 1
     property bool wasMaximized: false
-    readonly property var pages: ["Редактор", "Оператор", "Источники", "Теги", "Архив", "События"]
+    readonly property var pages: [qsTr("Редактор"), qsTr("Оператор"), qsTr("Источники"), qsTr("Теги"), qsTr("Архив"), qsTr("События")]
 
     function saveProject(force, action) {
         if (!force && api.path) {
@@ -45,13 +45,13 @@ ApplicationWindow {
     }
     function sourceStatus(source) {
         const status = api.statuses[source] || {}
-        return status.state === "connected" ? "Подключено" : status.state === "connecting" ? "Подключение" :
-              status.state === "disconnected" ? "Нет связи" : "Остановлено"
+        return status.state === "connected" ? qsTr("Подключено") : status.state === "connecting" ? qsTr("Подключение") :
+              status.state === "disconnected" ? qsTr("Нет связи") : qsTr("Остановлено")
     }
     function quality(tag) {
         const reading = api.readings[tag] || {}
-        return reading.quality === "good" ? "Достоверно" : reading.quality === "stale" ?
-            "Устарело" : reading.quality === "error" ? "Ошибка" : "Ожидание"
+        return reading.quality === "good" ? qsTr("Достоверно") : reading.quality === "stale" ?
+            qsTr("Устарело") : reading.quality === "error" ? qsTr("Ошибка") : qsTr("Ожидание")
     }
     function toggleOperatorFullscreen() {
         if (operatorFullscreen) {
@@ -102,24 +102,46 @@ ApplicationWindow {
             ActionButton {
                 objectName: "projectMenuButton"
                 compact: true
-                text: "Проект ▾"; fillTone: "#263c53"; textTone: "#f2f7fb"
+                text: qsTr("Проект ▾"); fillTone: "#263c53"; textTone: "#f2f7fb"
                 onClicked: projectMenu.open()
                 Menu {
                     id: projectMenu
                     y: parent.height
-                    MenuItem { objectName: "projectNew"; text: "Новый проект"; onTriggered: window.guard(() => { window.api.newProject(false); window.page = 2 }) }
-                    MenuItem { objectName: "projectOpen"; text: "Открыть…"; onTriggered: window.guard(() => openPicker.open()) }
-                    MenuItem { objectName: "projectSave"; text: "Сохранить"; onTriggered: window.saveProject(false, null) }
-                    MenuItem { objectName: "projectSaveAs"; text: "Сохранить как…"; onTriggered: window.saveProject(true, null) }
-                    MenuItem { objectName: "projectRename"; text: "Переименовать проект…"; onTriggered: nameDialog.edit("project", "", window.api.name) }
+                    MenuItem { objectName: "projectNew"; text: qsTr("Новый проект"); onTriggered: window.guard(() => { window.api.newProject(false); window.page = 2 }) }
+                    MenuItem { objectName: "projectOpen"; text: qsTr("Открыть…"); onTriggered: window.guard(() => openPicker.open()) }
+                    MenuItem { objectName: "projectSave"; text: qsTr("Сохранить"); onTriggered: window.saveProject(false, null) }
+                    MenuItem { objectName: "projectSaveAs"; text: qsTr("Сохранить как…"); onTriggered: window.saveProject(true, null) }
+                    MenuItem { objectName: "projectRename"; text: qsTr("Переименовать проект…"); onTriggered: nameDialog.edit("project", "", window.api.name) }
                     MenuSeparator {}
-                    MenuItem { objectName: "projectDemo"; text: "Открыть демопроект"; onTriggered: window.guard(() => { window.api.newProject(true); window.page = 0 }) }
+                    MenuItem { objectName: "projectDemo"; text: qsTr("Открыть демопроект"); onTriggered: window.guard(() => { window.api.newProject(true); window.page = 0 }) }
+                    MenuSeparator {}
+                    Menu {
+                        objectName: "interfaceLanguageMenu"
+                        title: qsTr("Язык интерфейса")
+                        ButtonGroup { id: languageChoices }
+                        MenuItem {
+                            objectName: "languageRussian"
+                            text: "Русский"
+                            checkable: true
+                            checked: interfaceLanguage.language === "ru"
+                            ButtonGroup.group: languageChoices
+                            onTriggered: interfaceLanguage.select("ru")
+                        }
+                        MenuItem {
+                            objectName: "languageUkrainian"
+                            text: "Українська"
+                            checkable: true
+                            checked: interfaceLanguage.language === "uk"
+                            ButtonGroup.group: languageChoices
+                            onTriggered: interfaceLanguage.select("uk")
+                        }
+                    }
                 }
             }
             ActionButton {
                 objectName: "saveButton"
                 compact: true
-                text: "Сохранить"
+                text: qsTr("Сохранить")
                 onClicked: window.saveProject(false, null)
             }
             Rectangle {
@@ -167,27 +189,27 @@ ApplicationWindow {
             Item { Layout.fillWidth: true }
             Label {
                 visible: window.api.simulator && window.width >= 1140
-                text: "Симулятор"; color: "#a9cec9"; font.pixelSize: 12
+                text: qsTr("Симулятор"); color: "#a9cec9"; font.pixelSize: 12
                 Layout.rightMargin: 4
             }
             Rectangle {
                 Layout.preferredWidth: 7; Layout.preferredHeight: 7; radius: 4
                 color: window.api.running ? "#5ee0af" : "#9daebc"
                 ToolTip.visible: statusHover.hovered
-                ToolTip.text: window.api.running ? "Опрос запущен" : "Опрос остановлен"
+                ToolTip.text: window.api.running ? qsTr("Опрос запущен") : qsTr("Опрос остановлен")
                 HoverHandler { id: statusHover }
             }
             ActionButton {
                 visible: window.api.simulator && window.api.running
                 objectName: "pauseDemo"
                 compact: true
-                text: window.api.simulatorPaused ? "Вернуть связь" : "Прервать связь"
+                text: window.api.simulatorPaused ? qsTr("Вернуть связь") : qsTr("Прервать связь")
                 onClicked: window.api.toggleSimulator()
             }
             ActionButton {
                 objectName: "runButton"
                 compact: true
-                text: window.api.running ? "Остановить" : "Запустить опрос"
+                text: window.api.running ? qsTr("Остановить") : qsTr("Запустить опрос")
                 highlighted: !window.api.running
                 onClicked: window.api.running ? window.api.stop() : window.startAcquisition()
             }
@@ -205,7 +227,7 @@ ApplicationWindow {
             visible: window.page === 2 || window.page === 3
             Layout.fillWidth: true
             LabelValue {
-                text: window.page === 2 ? "Источники данных" : "Теги"
+                text: window.page === 2 ? qsTr("Источники данных") : qsTr("Теги")
                 mode: "strong"; font.pixelSize: 16
                 Layout.fillWidth: true
             }
@@ -213,7 +235,7 @@ ApplicationWindow {
                 visible: window.page === 2
                 objectName: "addSource"
                 compact: true
-                text: "+ Источник"; highlighted: true
+                text: qsTr("+ Источник"); highlighted: true
                 enabled: !window.api.running
                 onClicked: sourceForm.edit({})
             }
@@ -221,7 +243,7 @@ ApplicationWindow {
                 visible: window.page === 3
                 objectName: "addTag"
                 compact: true
-                text: "+ Тег"; highlighted: true
+                text: qsTr("+ Тег"); highlighted: true
                 enabled: !window.api.running && window.api.sources.length > 0
                 onClicked: tagForm.edit({})
             }
@@ -237,7 +259,7 @@ ApplicationWindow {
                 operatorFullscreen: window.operatorFullscreen
                 onNameRequested: (id, name) => nameDialog.edit("screen", id, name)
                 onScreenPropertiesRequested: screen => screenProperties.edit(screen)
-                onDeleteScreenRequested: confirm.ask("Удалить этот экран?", "Удалить", () => window.api.removeScreen())
+                onDeleteScreenRequested: confirm.ask(qsTr("Удалить этот экран?"), qsTr("Удалить"), () => window.api.removeScreen())
             }
             Rectangle {
                 color: "#ffffff"; radius: 8; border.color: "#d7e0e8"
@@ -247,10 +269,10 @@ ApplicationWindow {
                         Layout.fillWidth: true; height: 39; radius: 4; color: "#eaf0f5"
                         RowLayout {
                             anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
-                            LabelValue { text: "Подключение"; mode: "strong"; Layout.preferredWidth: 235 }
-                            LabelValue { text: "Адрес"; mode: "strong"; Layout.fillWidth: true }
-                            LabelValue { objectName: "sourceExchangeHeading"; text: "Обмен"; mode: "strong"; Layout.preferredWidth: 115 }
-                            LabelValue { text: "Соединение"; mode: "strong"; Layout.preferredWidth: 129 }
+                            LabelValue { text: qsTr("Подключение"); mode: "strong"; Layout.preferredWidth: 235 }
+                            LabelValue { text: qsTr("Адрес"); mode: "strong"; Layout.fillWidth: true }
+                            LabelValue { objectName: "sourceExchangeHeading"; text: qsTr("Обмен"); mode: "strong"; Layout.preferredWidth: 115 }
+                            LabelValue { text: qsTr("Соединение"); mode: "strong"; Layout.preferredWidth: 129 }
                             Item { Layout.preferredWidth: 245 }
                         }
                     }
@@ -276,13 +298,13 @@ ApplicationWindow {
                                 LabelValue {
                                     objectName: "sourceExchange"
                                     text: row.engine ? (row.modelData.settings.transport === "serial" ? "JSON · USB COM" : "JSON · WebSocket") :
-                                        row.modelData.settings.pollMs + " мс"
+                                        row.modelData.settings.pollMs + qsTr(" мс")
                                     Layout.preferredWidth: 115
                                     mode: "muted"
                                 }
                                 LabelValue {
                                     text: window.sourceStatus(row.modelData.id); Layout.preferredWidth: 129
-                                    color: text === "Подключено" ? "#08766e" : "#5d6d80"
+                                    color: text === qsTr("Подключено") ? "#08766e" : "#5d6d80"
                                     ToolTip.visible: statusHover.hovered && !!(window.api.statuses[row.modelData.id] || {}).detail
                                     ToolTip.text: (window.api.statuses[row.modelData.id] || {}).detail || ""
                                     HoverHandler { id: statusHover }
@@ -294,34 +316,34 @@ ApplicationWindow {
                                     ActionButton {
                                         visible: row.engine
                                         objectName: "engineCatalog"
-                                        text: "Теги JSON ▾"
+                                        text: qsTr("Теги JSON ▾")
                                         onClicked: { window.catalogSource = row.modelData.id; catalogMenu.open() }
                                         Menu {
                                             id: catalogMenu
                                             y: parent.height
                                             MenuItem {
                                                 objectName: "jsonLoadSampleTags"
-                                                text: "Загрузить пример тегов"
+                                                text: qsTr("Загрузить пример тегов")
                                                 enabled: !window.api.running
                                                 onTriggered: window.api.importEngineTags(window.catalogSource)
                                             }
-                                            MenuItem { objectName: "jsonImportTags"; text: "Импортировать JSON…"; enabled: !window.api.running; onTriggered: tagImport.open() }
-                                            MenuItem { objectName: "jsonExportTags"; text: "Экспортировать JSON…"; onTriggered: tagExport.open() }
+                                            MenuItem { objectName: "jsonImportTags"; text: qsTr("Импортировать JSON…"); enabled: !window.api.running; onTriggered: tagImport.open() }
+                                            MenuItem { objectName: "jsonExportTags"; text: qsTr("Экспортировать JSON…"); onTriggered: tagExport.open() }
                                         }
                                     }
-                                    ActionButton { objectName: "sourceEdit_" + row.modelData.id; text: "Правка"; enabled: !window.api.running; onClicked: sourceForm.edit(row.modelData) }
+                                    ActionButton { objectName: "sourceEdit_" + row.modelData.id; text: qsTr("Правка"); enabled: !window.api.running; onClicked: sourceForm.edit(row.modelData) }
                                     ActionButton {
                                         objectName: "sourceRemove_" + row.modelData.id
-                                        text: "Удалить"; enabled: !window.api.running
+                                        text: qsTr("Удалить"); enabled: !window.api.running
                                         onClicked: {
                                             const id = row.modelData.id
-                                            confirm.ask("Удалить источник «" + row.modelData.name + "»?", "Удалить", () => window.api.removeSource(id))
+                                            confirm.ask(qsTr("Удалить источник «") + row.modelData.name + "»?", qsTr("Удалить"), () => window.api.removeSource(id))
                                         }
                                     }
                                 }
                             }
                         }
-                        LabelValue { anchors.centerIn: parent; visible: sources.count === 0; text: "Добавьте Modbus TCP или источник JSON-телеметрии."; mode: "muted" }
+                        LabelValue { anchors.centerIn: parent; visible: sources.count === 0; text: qsTr("Добавьте Modbus TCP или источник JSON-телеметрии."); mode: "muted" }
                         ScrollBar.vertical: ScrollBar {}
                     }
                 }
@@ -333,18 +355,18 @@ ApplicationWindow {
                     TextField {
                         id: filter
                         objectName: "tagSearch"
-                        Layout.preferredWidth: 300; placeholderText: "Поиск по имени тега"
+                        Layout.preferredWidth: 300; placeholderText: qsTr("Поиск по имени тега")
                         selectByMouse: true
                     }
                     Rectangle {
                         Layout.fillWidth: true; height: 39; radius: 4; color: "#eaf0f5"
                         RowLayout {
                             anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
-                            LabelValue { text: "Имя тега"; mode: "strong"; Layout.fillWidth: true }
-                            LabelValue { text: "Источник"; mode: "strong"; Layout.preferredWidth: 155 }
-                            LabelValue { text: "Адрес / JSON-путь"; mode: "strong"; Layout.preferredWidth: 153 }
-                            LabelValue { text: "Значение"; mode: "strong"; Layout.preferredWidth: 100 }
-                            LabelValue { text: "Качество / Время"; mode: "strong"; Layout.preferredWidth: 149 }
+                            LabelValue { text: qsTr("Имя тега"); mode: "strong"; Layout.fillWidth: true }
+                            LabelValue { text: qsTr("Источник"); mode: "strong"; Layout.preferredWidth: 155 }
+                            LabelValue { text: qsTr("Адрес / JSON-путь"); mode: "strong"; Layout.preferredWidth: 153 }
+                            LabelValue { text: qsTr("Значение"); mode: "strong"; Layout.preferredWidth: 100 }
+                            LabelValue { text: qsTr("Качество / Время"); mode: "strong"; Layout.preferredWidth: 149 }
                             Item { Layout.preferredWidth: 159 }
                         }
                     }
@@ -381,20 +403,20 @@ ApplicationWindow {
                                     ToolTip.text: row.reading.detail || ""
                                     HoverHandler { id: qualityHover }
                                 }
-                                ActionButton { objectName: "tagEdit_" + row.modelData.id; text: "Правка"; enabled: !window.api.running; onClicked: tagForm.edit(row.modelData) }
+                                ActionButton { objectName: "tagEdit_" + row.modelData.id; text: qsTr("Правка"); enabled: !window.api.running; onClicked: tagForm.edit(row.modelData) }
                                 ActionButton {
                                     objectName: "tagRemove_" + row.modelData.id
-                                    text: "Удалить"; enabled: !window.api.running
+                                    text: qsTr("Удалить"); enabled: !window.api.running
                                     onClicked: {
                                         const id = row.modelData.id
-                                        confirm.ask("Удалить тег «" + row.modelData.name + "» и его привязки?", "Удалить", () => window.api.removeTag(id))
+                                        confirm.ask(qsTr("Удалить тег «") + row.modelData.name + qsTr("» и его привязки?"), qsTr("Удалить"), () => window.api.removeTag(id))
                                     }
                                 }
                             }
                         }
                         LabelValue {
                             anchors.centerIn: parent; visible: tagList.count === 0; mode: "muted"
-                            text: window.api.sources.length ? "Нет тегов для показа." : "Сначала добавьте источник."
+                            text: window.api.sources.length ? qsTr("Нет тегов для показа.") : qsTr("Сначала добавьте источник.")
                         }
                         ScrollBar.vertical: ScrollBar {}
                     }
@@ -411,40 +433,40 @@ ApplicationWindow {
         RowLayout {
             anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
             LabelValue {
-                text: window.api.path || (window.api.simulator ? "Демопроект · архив в памяти" : "Проект ещё не сохранён")
+                text: window.api.path || (window.api.simulator ? qsTr("Демопроект · архив в памяти") : qsTr("Проект ещё не сохранён"))
                 mode: "muted"; Layout.fillWidth: true
             }
-            LabelValue { text: "Источники  " + window.api.sources.length + "     Теги  " + window.api.tags.length; mode: "muted" }
+            LabelValue { text: qsTr("Источники  ") + window.api.sources.length + qsTr("     Теги  ") + window.api.tags.length; mode: "muted" }
         }
     }
     FileDialog {
         id: tagImport
         objectName: "jsonImportPicker"
-        title: "Импорт таблицы тегов JSON"
-        nameFilters: ["Таблица JSON (*.json)"]
+        title: qsTr("Импорт таблицы тегов JSON")
+        nameFilters: [qsTr("Таблица JSON (*.json)")]
         onAccepted: window.api.importEngineTags(window.catalogSource, selectedFile)
     }
     FileDialog {
         id: tagExport
         objectName: "jsonExportPicker"
-        title: "Экспорт таблицы тегов JSON"
+        title: qsTr("Экспорт таблицы тегов JSON")
         fileMode: FileDialog.SaveFile
-        nameFilters: ["Таблица JSON (*.json)"]
+        nameFilters: [qsTr("Таблица JSON (*.json)")]
         onAccepted: window.api.exportEngineTags(window.catalogSource, selectedFile)
     }
     FileDialog {
         id: openPicker
         objectName: "projectOpenPicker"
-        title: "Открыть проект " + Qt.application.displayName
-        nameFilters: ["Проект " + Qt.application.displayName + " (*.scada.json)", "JSON (*.json)"]
+        title: qsTr("Открыть проект ") + Qt.application.displayName
+        nameFilters: [qsTr("Проект ") + Qt.application.displayName + " (*.scada.json)", "JSON (*.json)"]
         onAccepted: { if (window.api.open(selectedFile)) window.page = 0 }
     }
     FileDialog {
         id: savePicker
         objectName: "projectSavePicker"
-        title: "Сохранить проект " + Qt.application.displayName
+        title: qsTr("Сохранить проект ") + Qt.application.displayName
         fileMode: FileDialog.SaveFile
-        nameFilters: ["Проект " + Qt.application.displayName + " (*.scada.json)"]
+        nameFilters: [qsTr("Проект ") + Qt.application.displayName + " (*.scada.json)"]
         onAccepted: {
             const action = window.afterSave
             window.afterSave = null
@@ -459,7 +481,7 @@ ApplicationWindow {
         id: confirm
         objectName: "actionConfirmation"
         anchors.centerIn: parent; modal: true; focus: true; width: 460
-        title: "Подтверждение"
+        title: qsTr("Подтверждение")
         property var action
         function ask(question, button, callback) {
             questionLabel.text = question
@@ -473,7 +495,7 @@ ApplicationWindow {
             RowLayout {
                 Layout.fillWidth: true
                 Item { Layout.fillWidth: true }
-                ActionButton { objectName: "cancelAction"; text: "Отмена"; onClicked: confirm.close() }
+                ActionButton { objectName: "cancelAction"; text: qsTr("Отмена"); onClicked: confirm.close() }
                 ActionButton {
                     id: execute; objectName: "confirmAction"; highlighted: true
                     onClicked: { const action = confirm.action; confirm.close(); if (action) action() }
@@ -500,33 +522,33 @@ ApplicationWindow {
             else window.api.setScreen(entity, newName.text)
             close()
         }
-        title: kind === "project" ? "Название проекта" : entity ? "Название экрана" : "Новый экран"
+        title: kind === "project" ? qsTr("Название проекта") : entity ? qsTr("Название экрана") : qsTr("Новый экран")
         contentItem: ColumnLayout {
             spacing: 9
             TextField {
                 id: newName; objectName: "screenName"; Layout.fillWidth: true
-                placeholderText: "Название"; onAccepted: nameDialog.apply()
+                placeholderText: qsTr("Название"); onAccepted: nameDialog.apply()
             }
             RowLayout {
                 Layout.fillWidth: true
                 Item { Layout.fillWidth: true }
-                ActionButton { objectName: "cancelName"; text: "Отмена"; onClicked: nameDialog.close() }
-                ActionButton { objectName: "saveName"; text: "Сохранить"; highlighted: true; onClicked: nameDialog.apply() }
+                ActionButton { objectName: "cancelName"; text: qsTr("Отмена"); onClicked: nameDialog.close() }
+                ActionButton { objectName: "saveName"; text: qsTr("Сохранить"); highlighted: true; onClicked: nameDialog.apply() }
             }
         }
     }
     Dialog {
         id: unsaved
         anchors.centerIn: parent; modal: true; width: 460
-        title: "Есть несохранённые изменения"
+        title: qsTr("Есть несохранённые изменения")
         property var action
         contentItem: RowLayout {
             Item { Layout.fillWidth: true }
-            ActionButton { objectName: "unsavedCancel"; text: "Отмена"; onClicked: unsaved.close() }
-            ActionButton { objectName: "unsavedDiscard"; text: "Не сохранять"; onClicked: { const action = unsaved.action; unsaved.close(); if (action) action() } }
+            ActionButton { objectName: "unsavedCancel"; text: qsTr("Отмена"); onClicked: unsaved.close() }
+            ActionButton { objectName: "unsavedDiscard"; text: qsTr("Не сохранять"); onClicked: { const action = unsaved.action; unsaved.close(); if (action) action() } }
             ActionButton {
                 objectName: "unsavedSave"
-                text: "Сохранить"; highlighted: true
+                text: qsTr("Сохранить"); highlighted: true
                 onClicked: { const action = unsaved.action; unsaved.close(); window.saveProject(false, action) }
             }
         }
