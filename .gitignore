@@ -1,0 +1,9 @@
+/.toolchain/
+/build/
+/dist/
+/CMakeUserPresets.json
+*.scada.json
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+__pycache__/
